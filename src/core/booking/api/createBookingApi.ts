@@ -59,11 +59,16 @@ export function createBookingApi<TEntity = any>(
     },
 
     async getBuyerBookings(buyerId: number): Promise<Booking<TEntity>[]> {
-      const response = await api.get<any[]>(endpoints.getBuyerBookings(buyerId));
+      const response = await api.get<any>(endpoints.getBuyerBookings(buyerId));
       if (!response.data) {
         return [];
       }
-      return response.data.map(b => normalizeBooking(b, entityType));
+      // Car API returns {data: [...], count, message}
+      const bookingsData = entityType === 'car' ? response.data.data : response.data;
+      if (!bookingsData || !Array.isArray(bookingsData)) {
+        return [];
+      }
+      return bookingsData.map(b => normalizeBooking(b, entityType));
     },
 
     async getBookingById(bookingId: number, contextId: number): Promise<Booking<TEntity>> {
@@ -92,8 +97,12 @@ export function createBookingApi<TEntity = any>(
 
     async getEntityBookings(entityId: number): Promise<Booking<TEntity>[]> {
       try {
-        const response = await api.get<any[]>(endpoints.getEntityBookings(entityId));
-        return response.data.map(b => normalizeBooking(b, entityType));
+        const response = await api.get<any>(endpoints.getEntityBookings(entityId));
+        const bookingsData = entityType === 'car' ? response.data.data : response.data;
+        if (!bookingsData || !Array.isArray(bookingsData)) {
+          return [];
+        }
+        return bookingsData.map(b => normalizeBooking(b, entityType));
       } catch (error: any) {
         // Handle "No requests found" as an empty array instead of an error
         if (error?.response?.status === 400 &&
@@ -106,8 +115,12 @@ export function createBookingApi<TEntity = any>(
     },
 
     async getPendingBookings(sellerId?: number): Promise<Booking<TEntity>[]> {
-      const response = await api.get<any[]>(endpoints.getPendingBookings);
-      return response.data.map(b => normalizeBooking(b, entityType));
+      const response = await api.get<any>(endpoints.getPendingBookings);
+      const bookingsData = entityType === 'car' ? response.data.data : response.data;
+      if (!bookingsData || !Array.isArray(bookingsData)) {
+        return [];
+      }
+      return bookingsData.map(b => normalizeBooking(b, entityType));
     },
 
     async sendMessage(request: SendMessageRequest): Promise<Booking<TEntity>> {

@@ -45,23 +45,22 @@ const CHAT_CATEGORIES: ChatCategory[] = [
     color: '#8B5CF6',
     enabled: true,
   },
-  // Future: Add car, bike categories here
-  // {
-  //   id: 'car',
-  //   name: 'Cars',
-  //   icon: 'car',
-  //   emoji: '🚗',
-  //   color: '#EF4444',
-  //   enabled: false,
-  // },
-  // {
-  //   id: 'bike',
-  //   name: 'Bikes',
-  //   icon: 'motorbike',
-  //   emoji: '🏍️',
-  //   color: '#F59E0B',
-  //   enabled: false,
-  // },
+  {
+    id: 'car',
+    name: 'Cars',
+    icon: 'car',
+    emoji: '🚗',
+    color: '#EF4444',
+    enabled: true,
+  },
+  {
+    id: 'bike',
+    name: 'Bikes',
+    icon: 'motorbike',
+    emoji: '🏍️',
+    color: '#F59E0B',
+    enabled: false,
+  },
 ];
 
 const BuyerChatsScreen = () => {
