@@ -8,6 +8,7 @@ export interface BookingApiAdapter<TEntity = any> {
   getBuyerBookings(buyerId: number): Promise<Booking<TEntity>[]>;
   getBookingById(bookingId: number, contextId: number): Promise<Booking<TEntity>>;
   getEntityBookings(entityId: number): Promise<Booking<TEntity>[]>;
+  getSellerBookings?(sellerId: number): Promise<Booking<TEntity>[]>;
   getPendingBookings(sellerId?: number): Promise<Booking<TEntity>[]>;
   sendMessage(request: SendMessageRequest): Promise<Booking<TEntity>>;
   updateStatus(bookingId: number, status: string): Promise<Booking<TEntity>>;

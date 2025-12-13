@@ -5,6 +5,7 @@ export interface EndpointConfig {
   getBuyerBookings: (buyerId: number) => string;
   getBookingById: (bookingId: number) => string;
   getEntityBookings: (entityId: number) => string;
+  getSellerBookings?: (sellerId: number) => string;
   getPendingBookings: string;
   sendMessage: (bookingId: number) => string;
   updateStatus: (bookingId: number) => string;
@@ -38,6 +39,7 @@ const ENDPOINT_CONFIGS: Record<EntityType, EndpointConfig> = {
     getBuyerBookings: (buyerId) => `/api/carBookings/buyer/${buyerId}`,
     getBookingById: (bookingId) => `/api/carBookings/${bookingId}`,
     getEntityBookings: (carId) => `/api/carBookings/car/${carId}`,
+    getSellerBookings: (sellerId) => `/api/carBookings/seller/${sellerId}`,
     getPendingBookings: '/api/carBookings/pending',
     sendMessage: (bookingId) => `/api/carBookings/${bookingId}/message`,
     updateStatus: (bookingId) => `/api/carBookings/${bookingId}/status`,
@@ -54,6 +56,7 @@ const ENDPOINT_CONFIGS: Record<EntityType, EndpointConfig> = {
     getBuyerBookings: (buyerId) => `/api/laptopBookings/buyer/${buyerId}`,
     getBookingById: (bookingId) => `/api/laptopBookings/${bookingId}`,
     getEntityBookings: (laptopId) => `/api/laptopBookings/${laptopId}`,
+    getSellerBookings: (sellerId) => `/api/laptopBookings/seller/${sellerId}`,
     getPendingBookings: '/api/laptopBookings/pending',
     sendMessage: (bookingId) => `/api/laptopBookings/${bookingId}/message`,
     updateStatus: (bookingId) => `/api/laptopBookings/${bookingId}/status`,

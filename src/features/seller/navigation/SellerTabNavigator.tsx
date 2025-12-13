@@ -1,5 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { View, StyleSheet, Platform } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -8,8 +10,19 @@ import SellEntryStack from '../sell/navigation/SellEntryStack';
 import MyAdsEntryStack from '../listings/navigation/MyAdsEntryStack';
 import ProfileScreen from '../../shared/profile/screens/ProfileScreen';
 import SellerChatListScreen from '../chat/screens/SellerChatListScreen';
+import SellerEntityRequestsScreen from '../chat/screens/SellerEntityRequestsScreen';
+import SellerChatThreadScreen from '../chat/screens/SellerChatThreadScreen';
 
 const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
+
+const ChatStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="SellerChats" component={SellerChatListScreen} />
+    <Stack.Screen name="SellerEntityRequests" component={SellerEntityRequestsScreen} />
+    <Stack.Screen name="SellerChatThread" component={SellerChatThreadScreen} />
+  </Stack.Navigator>
+);
 
 // Same color palette as Buyer tab
 const TAB_THEME = {
@@ -64,16 +77,22 @@ const SellerTabNavigator = () => {
 
       <Tab.Screen
         name="Chat"
-        component={SellerChatListScreen}
-        options={{
-          tabBarLabel: 'Chats',
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? 'chatbubbles' : 'chatbubbles-outline'}
-              size={size}
-              color={color}
-            />
-          ),
+        component={ChatStack}
+        options={({ route }) => {
+          const routeName = getFocusedRouteNameFromRoute(route) ?? 'SellerChats';
+          const hideTabBar = routeName === 'SellerEntityRequests' || routeName === 'SellerChatThread';
+
+          return {
+            tabBarLabel: 'Chats',
+            tabBarIcon: ({ color, size, focused }) => (
+              <Ionicons
+                name={focused ? 'chatbubbles' : 'chatbubbles-outline'}
+                size={size}
+                color={color}
+              />
+            ),
+            tabBarStyle: hideTabBar ? { display: 'none' } : tabBarBaseStyle,
+          };
         }}
       />
 

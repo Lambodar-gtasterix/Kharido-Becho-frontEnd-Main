@@ -114,6 +114,25 @@ export function createBookingApi<TEntity = any>(
       }
     },
 
+    async getSellerBookings(sellerId: number): Promise<Booking<TEntity>[]> {
+      if (!endpoints.getSellerBookings) {
+        throw new Error(`getSellerBookings not supported for ${entityType}`);
+      }
+      try {
+        const response = await api.get<any>(endpoints.getSellerBookings(sellerId));
+        const bookingsData = response.data;
+        if (!bookingsData || !Array.isArray(bookingsData)) {
+          return [];
+        }
+        return bookingsData.map(b => normalizeBooking(b, entityType));
+      } catch (error: any) {
+        if (error?.response?.status === 400 || error?.response?.status === 404) {
+          return [];
+        }
+        throw error;
+      }
+    },
+
     async getPendingBookings(sellerId?: number): Promise<Booking<TEntity>[]> {
       const response = await api.get<any>(endpoints.getPendingBookings);
       const bookingsData = entityType === 'car' ? response.data.data : response.data;

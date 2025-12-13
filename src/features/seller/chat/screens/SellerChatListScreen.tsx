@@ -1,5 +1,4 @@
 // src/features/seller/chat/screens/SellerChatListScreen.tsx
-// Placeholder screen - Seller accesses chats from My Ads screen
 
 import React from 'react';
 import {
@@ -9,37 +8,119 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { EntityType } from '@core/booking/types/entity.types';
+
+interface ChatCategory {
+  id: EntityType;
+  name: string;
+  icon: string;
+  emoji: string;
+  color: string;
+  enabled: boolean;
+}
+
+const CHAT_CATEGORIES: ChatCategory[] = [
+  {
+    id: 'mobile',
+    name: 'Mobiles',
+    icon: 'cellphone',
+    emoji: '📱',
+    color: '#3B82F6',
+    enabled: false,
+  },
+  {
+    id: 'laptop',
+    name: 'Laptops',
+    icon: 'laptop',
+    emoji: '💻',
+    color: '#8B5CF6',
+    enabled: true,
+  },
+  {
+    id: 'car',
+    name: 'Cars',
+    icon: 'car',
+    emoji: '🚗',
+    color: '#EF4444',
+    enabled: false,
+  },
+  {
+    id: 'bike',
+    name: 'Bikes',
+    icon: 'motorbike',
+    emoji: '🏍️',
+    color: '#F59E0B',
+    enabled: false,
+  },
+];
 
 const SellerChatListScreen = () => {
-  return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Chats</Text>
-        <TouchableOpacity style={styles.headerIconButton} activeOpacity={0.7}>
-          <Icon name="magnify" size={24} color="#002F34" />
-        </TouchableOpacity>
+  const navigation = useNavigation();
+
+  const handleCategoryPress = (category: ChatCategory) => {
+    if (!category.enabled) {
+      return;
+    }
+
+    (navigation as any).navigate('SellerEntityRequests', {
+      entityType: category.id,
+      entityName: category.name,
+    });
+  };
+
+  const renderHeader = () => (
+    <View style={styles.header}>
+      <Text style={styles.headerTitle}>My Chats</Text>
+      <TouchableOpacity style={styles.searchButton}>
+        <Icon name="magnify" size={24} color="#002F34" />
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderCategoryCard = (category: ChatCategory) => (
+    <TouchableOpacity
+      key={category.id}
+      style={styles.categoryCard}
+      onPress={() => handleCategoryPress(category)}
+      activeOpacity={0.7}
+      disabled={!category.enabled}
+    >
+      <View
+        style={[
+          styles.categoryIconContainer,
+          { backgroundColor: category.enabled ? `${category.color}15` : '#F3F4F6' },
+        ]}
+      >
+        <Text style={styles.categoryEmoji}>{category.emoji}</Text>
       </View>
 
-      {/* Info Message */}
-      <View style={styles.emptyContainer}>
-        <View style={styles.emptyIconContainer}>
-          <Icon name="chat-outline" size={64} color="#CBD5E1" />
-        </View>
-        <Text style={styles.emptyTitle}>View chats from My Ads</Text>
-        <Text style={styles.emptySubtitle}>
-          To access buyer chat requests,{'\n'}
-          go to My Ads and tap the chat icon{'\n'}
-          on any mobile listing
+      <View style={styles.categoryInfo}>
+        <Text style={styles.categoryName}>{category.name}</Text>
+        <Text style={styles.categorySubtitle}>
+          {category.enabled ? 'View chats' : 'Coming soon'}
         </Text>
+      </View>
 
-        <View style={styles.infoCard}>
-          <Icon name="information-outline" size={20} color="#0F5E87" />
-          <Text style={styles.infoText}>
-            Each mobile has its own chat requests
-          </Text>
+      {category.enabled && (
+        <Icon name="chevron-right" size={24} color="#9CA3AF" />
+      )}
+
+      {!category.enabled && (
+        <View style={styles.comingSoonBadge}>
+          <Text style={styles.comingSoonText}>Soon</Text>
         </View>
+      )}
+    </TouchableOpacity>
+  );
+
+  return (
+    <SafeAreaView style={styles.container} edges={['top']}>
+      {renderHeader()}
+
+      <View style={styles.categoriesGrid}>
+        {CHAT_CATEGORIES.map(renderCategoryCard)}
       </View>
     </SafeAreaView>
   );
@@ -70,7 +151,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#002F34',
   },
-  headerIconButton: {
+  searchButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -78,49 +159,56 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-  },
-  emptyIconContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#F3F4F6',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  emptyTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#002F34',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  emptySubtitle: {
-    fontSize: 15,
-    color: '#6B7280',
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 24,
-  },
-  infoCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#E5F3F5',
+  categoriesGrid: {
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
   },
-  infoText: {
-    fontSize: 14,
-    color: '#0F5E87',
-    marginLeft: 8,
-    fontWeight: '500',
+  categoryCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  categoryIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  categoryEmoji: {
+    fontSize: 28,
+  },
+  categoryInfo: {
+    flex: 1,
+  },
+  categoryName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#002F34',
+    marginBottom: 4,
+  },
+  categorySubtitle: {
+    fontSize: 13,
+    color: '#6B7280',
+  },
+  comingSoonBadge: {
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  comingSoonText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#6B7280',
+    textTransform: 'uppercase',
   },
 });
 
