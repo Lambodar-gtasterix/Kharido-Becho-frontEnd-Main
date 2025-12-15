@@ -1,4 +1,4 @@
-export type EntityType = 'mobile' | 'car' | 'laptop'; // Future: Add | 'bike'
+export type EntityType = 'mobile' | 'car' | 'laptop' | 'bike';
 
 export interface BookableEntity {
   id: number;
@@ -68,4 +68,21 @@ export interface LaptopEntity extends BookableEntity {
   laptopPhotos?: Array<{ photoId: number; photo_link: string; publicId: string }>;
 }
 
-// Future: Add bike entity interfaces here
+// ========================================
+// BIKE BOOKING BLOCK
+// ========================================
+export interface BikeEntity extends BookableEntity {
+  bike_id: number;
+  prize: number;
+  brand?: string;
+  model?: string;
+  variant?: string;
+  manufactureYear?: number;
+  engineCC?: number;
+  kilometersDriven?: number;
+  fuelType?: string;
+  color?: string;
+  registrationNumber?: string;
+  description?: string;
+  images?: Array<{ imageId: number; image_link: string; publicId: string }>;
+}

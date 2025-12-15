@@ -92,7 +92,7 @@ export function CatalogDetailScreen<T extends BaseEntity>({
   );
 
   const handleChatPress = useCallback(() => {
-    const bookingUserId = config.type === 'car' ? buyerId : userId;
+    const bookingUserId = config.type === 'car' || config.type === 'bike' ? buyerId : userId;
     if (!bookingUserId) {
       Alert.alert('Error', 'Please log in to send a message');
       return;
@@ -115,8 +115,8 @@ export function CatalogDetailScreen<T extends BaseEntity>({
         return;
       }
 
-      // For car bookings, use buyerId; for mobile, use userId
-      const bookingUserId = config.type === 'car' ? buyerId : userId;
+      // For car and bike bookings, use buyerId; for mobile and laptop, use userId
+      const bookingUserId = config.type === 'car' || config.type === 'bike' ? buyerId : userId;
 
       if (!bookingUserId || !entity) {
         Alert.alert('Error', 'Unable to send message');
@@ -139,8 +139,11 @@ export function CatalogDetailScreen<T extends BaseEntity>({
         // Handle duplicate request error gracefully
         const isDuplicateError =
           error?.response?.data?.errorMessage?.includes('already sent a request') ||
+          error?.response?.data?.errorMessage?.includes('already created a booking') ||
           error?.response?.data?.message?.includes('already sent a request') ||
-          error?.response?.data?.errorCode === 'BIKE_OPERATION_FAILED';
+          error?.response?.data?.message?.includes('already created a booking') ||
+          error?.response?.data?.errorCode === 'BIKE_OPERATION_FAILED' ||
+          error?.response?.data?.errorCode === 'ERR_BAD_REQUEST';
 
         if (isDuplicateError) {
           setChatModalVisible(false);

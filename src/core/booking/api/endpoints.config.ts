@@ -65,7 +65,22 @@ const ENDPOINT_CONFIGS: Record<EntityType, EndpointConfig> = {
     approveBooking: (bookingId) => `/api/laptopBookings/${bookingId}/complete`,
   },
 
-  // Future: Add bike endpoints here
+  // ========================================
+  // BIKE BOOKING BLOCK
+  // ========================================
+  bike: {
+    createBooking: '/bikes/bookings/post',
+    getBuyerBookings: (buyerId) => `/api/bikeBookings/buyer/${buyerId}`,
+    getBookingById: (bookingId) => `/api/bikeBookings/${bookingId}`,
+    getEntityBookings: (bikeId) => `/api/bikeBookings/${bikeId}`,
+    getSellerBookings: (sellerId) => `/api/bikeBookings/seller/${sellerId}`,
+    getPendingBookings: '/api/bikeBookings/pending',
+    sendMessage: (bookingId) => `/api/bikeBookings/${bookingId}/message`,
+    updateStatus: (bookingId) => `/api/bikeBookings/${bookingId}/status`,
+    acceptBooking: (bookingId) => `/api/bikeBookings/${bookingId}/accept`,
+    rejectBooking: (bookingId) => `/api/bikeBookings/${bookingId}/reject`,
+    approveBooking: (bookingId) => `/api/bikeBookings/${bookingId}/complete`,
+  },
 };
 
 export function getEndpointConfig(entityType: EntityType): EndpointConfig {

@@ -51,7 +51,7 @@ const CHAT_CATEGORIES: ChatCategory[] = [
     icon: 'car',
     emoji: '🚗',
     color: '#EF4444',
-    enabled: false,
+    enabled: true,
   },
   {
     id: 'bike',

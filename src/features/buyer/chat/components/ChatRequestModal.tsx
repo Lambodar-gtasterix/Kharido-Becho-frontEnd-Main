@@ -35,6 +35,8 @@ const ChatRequestModal: React.FC<ChatRequestModalProps> = ({
         return 'Hi, is this laptop available?';
       case 'car':
         return 'Hi, is this car available?';
+      case 'bike':
+        return 'Hi, is this bike available?';
       case 'mobile':
       default:
         return 'Hi, is this phone available?';

@@ -55,6 +55,25 @@ export interface LaptopEntity extends BaseEntity {
   laptopPhotos?: Array<{ photoId: number; photo_link: string; publicId: string }>;
 }
 
+// Bike Entity Type
+export interface BikeEntity extends BaseEntity {
+  bike_id: number;
+  prize: number;
+  brand?: string;
+  model?: string;
+  variant?: string;
+  manufactureYear?: number;
+  engineCC?: number;
+  kilometersDriven?: number;
+  fuelType?: string;
+  color?: string;
+  registrationNumber?: string;
+  description?: string;
+  sellerId?: number;
+  status?: string;
+  images?: Array<{ imageId: number; image_link: string; publicId: string }>;
+}
+
 // Mobile Configuration
 export const mobileConfig: EntityConfig<MobileEntity> = {
   type: 'mobile',
@@ -183,11 +202,64 @@ export const laptopConfig: EntityConfig<LaptopEntity> = {
   color: '#7C3AED',
 };
 
+// Bike Configuration
+export const bikeConfig: EntityConfig<BikeEntity> = {
+  type: 'bike',
+  displayName: 'Bike',
+  displayNamePlural: 'Bikes',
+
+  api: {
+    getAll: '/bikes/get',
+    getById: (id: number) => `/bikes/get/${id}`,
+  },
+
+  idField: 'bike_id',
+  titleField: 'model',
+  priceField: 'prize',
+  imagesField: 'images',
+  descriptionField: 'description',
+
+  detailFields: [
+    { key: 'brand', label: 'Brand', icon: 'motorbike' },
+    { key: 'model', label: 'Model', icon: 'information' },
+    { key: 'variant', label: 'Variant', icon: 'tag' },
+    {
+      key: 'manufactureYear',
+      label: 'Year',
+      icon: 'calendar',
+      format: (value) => value?.toString() || 'N/A',
+    },
+    {
+      key: 'engineCC',
+      label: 'Engine',
+      icon: 'engine',
+      format: (value) => value ? `${value} CC` : 'N/A',
+    },
+    {
+      key: 'kilometersDriven',
+      label: 'Kilometers Driven',
+      icon: 'speedometer',
+      format: (value) => value ? `${value.toLocaleString()} km` : 'N/A',
+    },
+    { key: 'fuelType', label: 'Fuel Type', icon: 'gas-station' },
+    { key: 'color', label: 'Color', icon: 'palette' },
+    { key: 'registrationNumber', label: 'Registration', icon: 'card-text' },
+  ],
+
+  stackName: 'BikeStack',
+  listScreenName: 'BikeListing',
+  detailScreenName: 'BikeDetail',
+
+  icon: 'motorbike',
+  color: '#F59E0B',
+};
+
 // Entity Registry - Central place to access all entity configurations
 export const entityRegistry: Record<string, EntityConfig> = {
   mobile: mobileConfig,
   car: carConfig,
   laptop: laptopConfig,
+  bike: bikeConfig,
 };
 
 // Helper function to get entity config

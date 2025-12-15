@@ -52,7 +52,16 @@ export function createBookingApi<TEntity = any>(
         };
       }
 
-      // Future: Add bike booking payload here
+      // ========================================
+      // BIKE BOOKING BLOCK
+      // ========================================
+      if (entityType === 'bike') {
+        payload = {
+          bikeId: request.entityId,
+          buyerId: request.buyerUserId,
+          message: request.message,
+        };
+      }
 
       const response = await api.post<any>(endpoints.createBooking, payload);
       return normalizeBooking(response.data, entityType);
@@ -218,19 +227,19 @@ function normalizeBooking<TEntity>(data: any, entityType: EntityType): Booking<T
   return {
     bookingId: data.bookingId || data.requestId || data.laptopBookingId || data.carBookingId,
     requestId: data.requestId || data.laptopBookingId,
-    entityId: data.mobileId || data.carId || data.laptopId, // Future: Add || data.bikeId
+    entityId: data.mobileId || data.carId || data.laptopId || data.bikeId,
     entityType,
     buyerId: data.buyerId || data.buyerUserId,
     sellerId: data.sellerId || data.sellerUserId,
     buyerName: data.buyerName,
     sellerName: data.sellerName,
     status: data.status || data.bookingStatus,
-    createdAt: data.createdAt || new Date().toISOString(),
+    createdAt: data.createdAt || data.timestamp || new Date().toISOString(),
     updatedAt: data.updatedAt || null,
     conversation: data.conversation || [],
     messageCount: data.messageCount,
     lastMessage: data.lastMessage,
     lastMessageTime: data.lastMessageTime,
-    entityData: data.mobile || data.car || data.laptop, // Future: Add || data.bike
+    entityData: data.mobile || data.car || data.laptop || data.bike,
   };
 }

@@ -90,6 +90,15 @@ const refreshSession = async (session: PersistedSession) => {
         );
       } catch (error) {
         await clearSession({ emitUnauthorized: true });
+
+        // Log unexpected errors only
+        if (__DEV__) {
+          const status = (error as any)?.response?.status;
+          if (status !== 401 && status !== 403) {
+            console.warn('[AUTH] Token refresh failed unexpectedly', error);
+          }
+        }
+
         throw error;
       } finally {
         refreshPromise = null;
@@ -115,9 +124,7 @@ const ensureActiveSession = async (): Promise<PersistedSession | null> => {
     try {
       session = await refreshSession(session);
     } catch (error) {
-      if (__DEV__) {
-        console.warn('[AUTH] Forced refresh failed', error);
-      }
+      // Don't log - session already cleared, user will be redirected to login
       return null;
     }
   } else if (shouldRefreshAccessToken(session, ACCESS_TOKEN_REFRESH_WINDOW_MS)) {
@@ -127,8 +134,12 @@ const ensureActiveSession = async (): Promise<PersistedSession | null> => {
         session = refreshed;
       }
     } catch (error) {
+      // Preemptive refresh failed, but current token still valid - continue
       if (__DEV__) {
-        console.warn('[AUTH] Preemptive refresh failed', error);
+        const is401 = (error as any)?.response?.status === 401;
+        if (!is401) {
+          console.warn('[AUTH] Preemptive refresh failed (non-401)', error);
+        }
       }
     }
   }
@@ -210,9 +221,7 @@ api.interceptors.response.use(
           return api(config);
         }
       } catch (refreshError) {
-        if (__DEV__) {
-          console.warn('[AUTH] Refresh on 401 failed', refreshError);
-        }
+        // Refresh failed - session cleared, user will be logged out
       }
     }
 

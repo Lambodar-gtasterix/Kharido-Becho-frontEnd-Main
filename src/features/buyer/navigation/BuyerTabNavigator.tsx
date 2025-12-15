@@ -16,6 +16,7 @@ import {
   mobileConfig,
   carConfig,
   laptopConfig,
+  bikeConfig,
 } from '../browse/config/entityConfigs';
 import { createCatalogStack } from '../browse/navigation/createCatalogStack';
 
@@ -30,6 +31,7 @@ const Stack = createStackNavigator();
 const MobileStack = createCatalogStack(mobileConfig);
 const CarStack = createCatalogStack(carConfig);
 const LaptopStack = createCatalogStack(laptopConfig);
+const BikeStack = createCatalogStack(bikeConfig);
 
 const HomeStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -37,6 +39,7 @@ const HomeStack = () => (
     <Stack.Screen name="MobileStack" component={MobileStack} />
     <Stack.Screen name="CarStack" component={CarStack} />
     <Stack.Screen name="LaptopStack" component={LaptopStack} />
+    <Stack.Screen name="BikeStack" component={BikeStack} />
   </Stack.Navigator>
 );
 
@@ -79,7 +82,7 @@ const BuyerTabNavigator = () => {
           const routeName = getFocusedRouteNameFromRoute(route) ?? 'BuyerHomeMain';
 
           // Hide tab bar when viewing any entity stack
-          const entityStacks = ['MobileStack', 'CarStack', 'LaptopStack'];
+          const entityStacks = ['MobileStack', 'CarStack', 'LaptopStack', 'BikeStack'];
           const hideTabBar = entityStacks.includes(routeName);
 
           return {

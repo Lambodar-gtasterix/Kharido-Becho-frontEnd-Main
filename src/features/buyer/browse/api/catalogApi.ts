@@ -29,8 +29,8 @@ export async function getAllEntities<T extends BaseEntity>(
   if (Array.isArray(response.data)) {
     // Sort array client-side (newest first by ID)
     const sortedData = [...response.data].sort((a, b) => {
-      const idA = a.id || 0;
-      const idB = b.id || 0;
+      const idA = getEntityId(a as T, config);
+      const idB = getEntityId(b as T, config);
       return idB - idA; // Descending order (newest first)
     });
 
@@ -81,6 +81,11 @@ export function getEntityTitle<T extends BaseEntity>(
     return `${(entity as any).brand} ${title}`;
   }
 
+  // For bikes, combine brand and model
+  if (config.type === 'bike' && (entity as any).brand) {
+    return `${(entity as any).brand} ${title}`;
+  }
+
   return title || 'Untitled';
 }
 
@@ -122,6 +127,14 @@ export function getEntityImages<T extends BaseEntity>(
     return images.map((img: any) => ({
       imageId: img.photoId,
       imageUrl: img.photo_link,
+    }));
+  }
+
+  // Handle bike images format { imageId, image_link }
+  if (images[0].image_link) {
+    return images.map((img: any) => ({
+      imageId: img.imageId,
+      imageUrl: img.image_link,
     }));
   }
 
