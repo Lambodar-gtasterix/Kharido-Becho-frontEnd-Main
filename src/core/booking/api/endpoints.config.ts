@@ -41,7 +41,7 @@ const ENDPOINT_CONFIGS: Record<EntityType, EndpointConfig> = {
     getEntityBookings: (carId) => `/api/carBookings/car/${carId}`,
     getSellerBookings: (sellerId) => `/api/carBookings/seller/${sellerId}`,
     getPendingBookings: '/api/carBookings/pending',
-    sendMessage: (bookingId) => `/api/carBookings/${bookingId}/message`,
+    sendMessage: (bookingId) => `/api/carBookings/send`,
     updateStatus: (bookingId) => `/api/carBookings/${bookingId}/status`,
     acceptBooking: (bookingId) => `/api/carBookings/${bookingId}/accept`,
     rejectBooking: (bookingId) => `/api/carBookings/${bookingId}/reject`,
@@ -54,7 +54,7 @@ const ENDPOINT_CONFIGS: Record<EntityType, EndpointConfig> = {
   laptop: {
     createBooking: '/api/laptopBookings/create',
     getBuyerBookings: (buyerId) => `/api/laptopBookings/buyer/${buyerId}`,
-    getBookingById: (bookingId) => `/api/laptopBookings/${bookingId}`,
+    getBookingById: (bookingId) => `/api/laptopBookings/booking/${bookingId}`,
     getEntityBookings: (laptopId) => `/api/laptopBookings/${laptopId}`,
     getSellerBookings: (sellerId) => `/api/laptopBookings/seller/${sellerId}`,
     getPendingBookings: '/api/laptopBookings/pending',

@@ -75,7 +75,17 @@ const BuyerChatThreadScreen = () => {
 
     try {
       const updatedBooking = await sendMessage(requestId, userId, message);
-      updateBooking(updatedBooking); // Update state directly without reload
+
+      // For car: merge conversation only (API returns partial data)
+      if (entityType === 'car' && booking) {
+        updateBooking({
+          ...booking,
+          conversation: updatedBooking.conversation,
+        });
+      } else {
+        // For mobile/laptop: full booking update
+        updateBooking(updatedBooking);
+      }
     } catch (err: any) {
       console.error('[CHAT_THREAD] Error sending message:', err);
       Alert.alert('Failed to send', err?.message || 'Please try again');
