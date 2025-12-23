@@ -23,10 +23,10 @@ export const getBuyerStatusConfig = (status: string): StatusConfig => {
       };
     case 'CONFIRMED':
       return {
-        label: 'Confirmed',
-        color: '#10B981',
-        bgColor: '#D1FAE5',
-        icon: 'check-circle'
+        label: 'In Negotiation',  // Show CONFIRMED as "In Negotiation" for car bookings
+        color: '#3B82F6',
+        bgColor: '#DBEAFE',
+        icon: 'chat-processing'
       };
     case 'ACCEPTED':
       return {
@@ -84,10 +84,10 @@ export const getSellerStatusConfig = (status: string): StatusConfig => {
       };
     case 'CONFIRMED':
       return {
-        label: 'Confirmed',
-        color: '#10B981',
-        bgColor: '#D1FAE5',
-        icon: 'check-circle'
+        label: 'In Negotiation',  // Show CONFIRMED as "In Negotiation" for car bookings
+        color: '#3B82F6',
+        bgColor: '#DBEAFE',
+        icon: 'chat-processing'
       };
     case 'ACCEPTED':
       return {

@@ -42,10 +42,10 @@ const ENDPOINT_CONFIGS: Record<EntityType, EndpointConfig> = {
     getSellerBookings: (sellerId) => `/api/carBookings/seller/${sellerId}`,
     getPendingBookings: '/api/carBookings/pending',
     sendMessage: (bookingId) => `/api/carBookings/send`,
-    updateStatus: (bookingId) => `/api/carBookings/${bookingId}/status`,
-    acceptBooking: (bookingId) => `/api/carBookings/${bookingId}/accept`,
-    rejectBooking: (bookingId) => `/api/carBookings/${bookingId}/reject`,
-    approveBooking: (bookingId) => `/api/carBookings/${bookingId}/complete`,
+    updateStatus: (bookingId) => `/api/carBookings/acceptBooking`, // No direct status update, using accept
+    acceptBooking: (bookingId) => `/api/carBookings/acceptBooking`,
+    rejectBooking: (bookingId) => `/api/carBookings/rejectBooking`,
+    approveBooking: (bookingId) => `/api/carBookings/approveBooking`,
   },
 
   // ========================================
@@ -70,16 +70,16 @@ const ENDPOINT_CONFIGS: Record<EntityType, EndpointConfig> = {
   // ========================================
   bike: {
     createBooking: '/bikes/bookings/post',
-    getBuyerBookings: (buyerId) => `/api/bikeBookings/buyer/${buyerId}`,
-    getBookingById: (bookingId) => `/api/bikeBookings/${bookingId}`,
-    getEntityBookings: (bikeId) => `/api/bikeBookings/${bikeId}`,
-    getSellerBookings: (sellerId) => `/api/bikeBookings/seller/${sellerId}`,
-    getPendingBookings: '/api/bikeBookings/pending',
-    sendMessage: (bookingId) => `/api/bikeBookings/${bookingId}/message`,
-    updateStatus: (bookingId) => `/api/bikeBookings/${bookingId}/status`,
-    acceptBooking: (bookingId) => `/api/bikeBookings/${bookingId}/accept`,
-    rejectBooking: (bookingId) => `/api/bikeBookings/${bookingId}/reject`,
-    approveBooking: (bookingId) => `/api/bikeBookings/${bookingId}/complete`,
+    getBuyerBookings: (buyerId) => `/bikes/bookings/buyer/${buyerId}`,
+    getBookingById: (bookingId) => `/bikes/bookings/${bookingId}`,
+    getEntityBookings: (bikeId) => `/bikes/bookings/${bikeId}`,
+    getSellerBookings: (sellerId) => `/bikes/bookings/get-seller/${sellerId}`,
+    getPendingBookings: '/bikes/bookings/pending',
+    sendMessage: (bookingId) => `/bikes/bookings/${bookingId}/message`,
+    updateStatus: (bookingId) => `/bikes/bookings/${bookingId}/status`,
+    acceptBooking: (bookingId) => `/bikes/bookings/${bookingId}/accept`,
+    rejectBooking: (bookingId) => `/bikes/bookings/${bookingId}/reject`,
+    approveBooking: (bookingId) => `/bikes/bookings/${bookingId}/complete`,
   },
 };
 

@@ -25,22 +25,48 @@ const StatusActionButtons: React.FC<StatusActionButtonsProps> = ({
   // Create API instance based on entity type
   const api = createBookingApi(entityType);
 
-  const handleStatusUpdate = async (newStatus: BookingStatus, action: string) => {
+  const handleAccept = async () => {
     Alert.alert(
-      `${action}?`,
-      `Are you sure you want to ${action.toLowerCase()} this request?`,
+      'Accept Request?',
+      'Are you sure you want to accept this request?',
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: action,
+          text: 'Accept',
           onPress: async () => {
             try {
               setLoading(true);
-              await api.updateStatus(requestId, newStatus);
-              Alert.alert('Success', `Request ${action.toLowerCase()}ed successfully`);
+              await api.acceptBooking(requestId);
+              Alert.alert('Success', 'Request accepted successfully');
               onStatusUpdated();
             } catch (error: any) {
-              Alert.alert('Error', error?.message || `Failed to ${action.toLowerCase()} request`);
+              Alert.alert('Error', error?.message || 'Failed to accept request');
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleReject = async () => {
+    Alert.alert(
+      'Reject Request?',
+      'Are you sure you want to reject this request?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reject',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await api.rejectBooking(requestId);
+              Alert.alert('Success', 'Request rejected successfully');
+              onStatusUpdated();
+            } catch (error: any) {
+              Alert.alert('Error', error?.message || 'Failed to reject request');
             } finally {
               setLoading(false);
             }
@@ -51,7 +77,9 @@ const StatusActionButtons: React.FC<StatusActionButtonsProps> = ({
   };
 
   const handleCompleteDeal = async () => {
-    const entityName = entityType === 'mobile' ? 'mobile' : entityType === 'laptop' ? 'laptop' : 'item';
+    const entityName = entityType === 'mobile' ? 'mobile' :
+                       entityType === 'laptop' ? 'laptop' :
+                       entityType === 'car' ? 'car' : 'item';
 
     Alert.alert(
       'Complete Deal?',
@@ -97,13 +125,13 @@ const StatusActionButtons: React.FC<StatusActionButtonsProps> = ({
     );
   }
 
-  // PENDING status - Show Accept and Reject
-  if (currentStatus === 'PENDING') {
+  // PENDING status - Show Accept and Reject (for mobile/laptop)
+  if (currentStatus === 'PENDING' && entityType !== 'car') {
     return (
       <View style={styles.container}>
         <TouchableOpacity
           style={[styles.button, styles.acceptButton]}
-          onPress={() => handleStatusUpdate('ACCEPTED', 'Accept')}
+          onPress={handleAccept}
           activeOpacity={0.8}
         >
           <Icon name="check-circle" size={18} color="#FFFFFF" />
@@ -112,7 +140,7 @@ const StatusActionButtons: React.FC<StatusActionButtonsProps> = ({
 
         <TouchableOpacity
           style={[styles.button, styles.rejectButton]}
-          onPress={() => handleStatusUpdate('REJECTED', 'Reject')}
+          onPress={handleReject}
           activeOpacity={0.8}
         >
           <Icon name="close-circle" size={18} color="#EF4444" />
@@ -122,8 +150,8 @@ const StatusActionButtons: React.FC<StatusActionButtonsProps> = ({
     );
   }
 
-  // IN_NEGOTIATION or ACCEPTED status - Show Complete and Reject
-  if (currentStatus === 'IN_NEGOTIATION' || currentStatus === 'ACCEPTED') {
+  // IN_NEGOTIATION, ACCEPTED, or CONFIRMED status - Show Accept (Complete Deal) and Reject
+  if (currentStatus === 'IN_NEGOTIATION' || currentStatus === 'ACCEPTED' || currentStatus === 'CONFIRMED') {
     return (
       <View style={styles.container}>
         <TouchableOpacity
@@ -132,12 +160,12 @@ const StatusActionButtons: React.FC<StatusActionButtonsProps> = ({
           activeOpacity={0.8}
         >
           <Icon name="check-all" size={18} color="#FFFFFF" />
-          <Text style={styles.completeButtonText}>Complete Deal</Text>
+          <Text style={styles.completeButtonText}>Accept</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.button, styles.rejectButton]}
-          onPress={() => handleStatusUpdate('REJECTED', 'Reject')}
+          onPress={handleReject}
           activeOpacity={0.8}
         >
           <Icon name="close-circle" size={18} color="#EF4444" />
@@ -147,7 +175,8 @@ const StatusActionButtons: React.FC<StatusActionButtonsProps> = ({
     );
   }
 
-  // COMPLETED or REJECTED - no buttons
+  // PENDING for car - no buttons (auto-accept happens on first message)
+  // COMPLETED, REJECTED, or SOLD - no buttons
   return null;
 };
 

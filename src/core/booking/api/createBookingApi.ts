@@ -230,16 +230,37 @@ export function createBookingApi<TEntity = any>(
     },
 
     async acceptBooking(bookingId: number): Promise<Booking<TEntity>> {
+      // Car uses query params, others use path params
+      if (entityType === 'car') {
+        const response = await api.patch<any>(endpoints.acceptBooking(bookingId), null, {
+          params: { bookingId },
+        });
+        return normalizeBooking(response.data, entityType);
+      }
       const response = await api.patch<any>(endpoints.acceptBooking(bookingId));
       return normalizeBooking(response.data, entityType);
     },
 
     async rejectBooking(bookingId: number): Promise<Booking<TEntity>> {
+      // Car uses query params, others use path params
+      if (entityType === 'car') {
+        const response = await api.patch<any>(endpoints.rejectBooking(bookingId), null, {
+          params: { bookingId },
+        });
+        return normalizeBooking(response.data, entityType);
+      }
       const response = await api.patch<any>(endpoints.rejectBooking(bookingId));
       return normalizeBooking(response.data, entityType);
     },
 
     async approveBooking(bookingId: number): Promise<Booking<TEntity>> {
+      // Car uses query params and PATCH, others use path params and POST
+      if (entityType === 'car') {
+        const response = await api.patch<any>(endpoints.approveBooking(bookingId), null, {
+          params: { bookingId },
+        });
+        return normalizeBooking(response.data, entityType);
+      }
       const response = await api.post<any>(endpoints.approveBooking(bookingId));
       return normalizeBooking(response.data, entityType);
     },
@@ -257,6 +278,12 @@ function normalizeBooking<TEntity>(data: any, entityType: EntityType): Booking<T
     const lastName = data.seller.user.lastName || '';
     sellerName = `${firstName} ${lastName}`.trim();
   }
+  // For bike API - seller is nested inside bike object
+  if (!sellerName && data.bike?.seller?.user) {
+    const firstName = data.bike.seller.user.firstName || '';
+    const lastName = data.bike.seller.user.lastName || '';
+    sellerName = `${firstName} ${lastName}`.trim();
+  }
 
   // Extract buyer name from nested structure for car/laptop/bike
   let buyerName = data.buyerName;
@@ -266,19 +293,34 @@ function normalizeBooking<TEntity>(data: any, entityType: EntityType): Booking<T
     buyerName = `${firstName} ${lastName}`.trim();
   }
 
+  // Extract IDs from nested structures
+  const buyerId = data.buyerId || data.buyerUserId || data.buyer?.buyerId;
+  const sellerId = data.sellerId || data.sellerUserId || data.seller?.sellerId || data.bike?.seller?.sellerId;
+  const entityId = data.mobileId || data.carId || data.laptopId || data.bikeId ||
+                   data.mobile?.mobileId || data.car?.carId || data.laptop?.laptopId || data.bike?.bike_id;
+
+  // Normalize conversation messages (car API uses userId instead of senderId)
+  const conversation = (data.conversation || []).map((msg: any) => ({
+    senderId: msg.senderId || msg.userId,
+    senderType: msg.senderType,
+    message: msg.message,
+    timestamp: msg.timestamp,
+    senderName: msg.senderName || (msg.senderType === 'BUYER' ? buyerName : sellerName) || 'Unknown',
+  }));
+
   return {
-    bookingId: data.bookingId || data.requestId || data.laptopBookingId || data.carBookingId,
-    requestId: data.requestId || data.laptopBookingId,
-    entityId: data.mobileId || data.carId || data.laptopId || data.bikeId,
+    bookingId: data.bookingId || data.requestId || data.laptopBookingId || data.carBookingId || data.id,
+    requestId: data.requestId || data.laptopBookingId || data.id,
+    entityId,
     entityType,
-    buyerId: data.buyerId || data.buyerUserId,
-    sellerId: data.sellerId || data.sellerUserId,
+    buyerId,
+    sellerId,
     buyerName,
     sellerName,
     status: data.status || data.bookingStatus,
     createdAt: data.createdAt || data.timestamp || new Date().toISOString(),
     updatedAt: data.updatedAt || null,
-    conversation: data.conversation || [],
+    conversation,
     messageCount: data.messageCount,
     lastMessage: data.lastMessage,
     lastMessageTime: data.lastMessageTime,

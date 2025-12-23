@@ -30,21 +30,23 @@ interface RouteParams {
   buyerName?: string;
   mobileId?: number;
   laptopId?: number;
+  carId?: number;
   mobileTitle?: string;
   laptopTitle?: string;
+  carTitle?: string;
   entityType?: 'mobile' | 'laptop' | 'car';
 }
 
 const SellerChatThreadScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { requestId, buyerId, buyerName, mobileId, laptopId, mobileTitle, laptopTitle, entityType = 'mobile' } = route.params as RouteParams;
+  const { requestId, buyerId, buyerName, mobileId, laptopId, carId, mobileTitle, laptopTitle, carTitle, entityType = 'mobile' } = route.params as RouteParams;
   const { userId } = useAuth();
 
   const [refreshing, setRefreshing] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
-  const entityId = mobileId || laptopId || 0;
+  const entityId = mobileId || laptopId || carId || 0;
 
   // Use generic booking hooks
   const { booking, loading, error, refresh, updateBooking } = useBookingThread<MobileEntity>({
@@ -81,27 +83,36 @@ const SellerChatThreadScreen = () => {
     }
 
     try {
-      console.log('[SELLER_SEND_MESSAGE] Sending message:', {
-        requestId,
-        senderUserId: userId,
-        sellerId: booking?.sellerId,
-        buyerId: booking?.buyerId,
-        message: message.substring(0, 20),
-      });
+      let currentBooking = booking;
 
-      // Auto-change status from PENDING to IN_NEGOTIATION when seller sends first message
+      // Auto-change status when seller sends first message ONLY
       if (booking?.status === 'PENDING') {
-        console.log('[SELLER_CHAT] Auto-changing status from PENDING to IN_NEGOTIATION');
         const api = createBookingApi(entityType);
-        await api.updateStatus(requestId, 'IN_NEGOTIATION');
+
+        if (entityType === 'car') {
+          // Car: PENDING → acceptBooking → CONFIRMED (shown as "In Negotiation")
+          currentBooking = await api.acceptBooking(requestId);
+          updateBooking(currentBooking);
+        } else {
+          // Mobile/Laptop: PENDING → updateStatus → IN_NEGOTIATION
+          await api.updateStatus(requestId, 'IN_NEGOTIATION');
+          currentBooking = {
+            ...booking,
+            status: 'IN_NEGOTIATION',
+          };
+          updateBooking(currentBooking);
+        }
       }
 
       const updatedBooking = await sendMessage(requestId, userId, message);
-      console.log('[SELLER_SEND_MESSAGE] Response received:', {
-        conversationLength: updatedBooking.conversation?.length,
-        lastMessage: updatedBooking.conversation?.[updatedBooking.conversation.length - 1],
-      });
-      updateBooking(updatedBooking); // Update state directly without reload
+
+      // Only update conversation - status already updated above or doesn't change
+      if (currentBooking) {
+        updateBooking({
+          ...currentBooking,
+          conversation: updatedBooking.conversation,
+        });
+      }
     } catch (err: any) {
       console.error('[SELLER_CHAT_THREAD] Error sending message:', err);
       Alert.alert('Failed to send', err?.message || 'Please try again');
@@ -126,7 +137,7 @@ const SellerChatThreadScreen = () => {
           {booking?.buyerName || `Buyer #${buyerId}`}
         </Text>
         <Text style={styles.headerSubtitle}>
-          {mobileTitle || laptopTitle || `${entityType} Request #${booking?.entityId || requestId}`}
+          {mobileTitle || laptopTitle || carTitle || `${entityType} Request #${booking?.entityId || requestId}`}
         </Text>
       </View>
 

@@ -28,6 +28,13 @@ export const getBuyerStatusConfig = (status: string): StatusConfig => {
         bgColor: '#DBEAFE',
         icon: 'chat-processing'
       };
+    case 'CONFIRMED':
+      return {
+        label: 'In Negotiation',  // Show CONFIRMED as "In Negotiation" for car bookings
+        color: '#3B82F6',
+        bgColor: '#DBEAFE',
+        icon: 'chat-processing'
+      };
     case 'ACCEPTED':
       return {
         label: 'Accepted',
@@ -45,6 +52,13 @@ export const getBuyerStatusConfig = (status: string): StatusConfig => {
     case 'COMPLETED':
       return {
         label: 'Completed',
+        color: '#6B7280',
+        bgColor: '#F3F4F6',
+        icon: 'check-all'
+      };
+    case 'SOLD':
+      return {
+        label: 'Sold',
         color: '#6B7280',
         bgColor: '#F3F4F6',
         icon: 'check-all'
@@ -78,6 +92,13 @@ export const getSellerStatusConfig = (status: string): StatusConfig => {
         bgColor: '#DBEAFE',
         icon: 'chat-processing'
       };
+    case 'CONFIRMED':
+      return {
+        label: 'In Negotiation',  // Show CONFIRMED as "In Negotiation" for car bookings
+        color: '#3B82F6',
+        bgColor: '#DBEAFE',
+        icon: 'chat-processing'
+      };
     case 'ACCEPTED':
       return {
         label: 'Accepted',
@@ -99,6 +120,13 @@ export const getSellerStatusConfig = (status: string): StatusConfig => {
         bgColor: '#F3F4F6',
         icon: 'check-all'
       };
+    case 'SOLD':
+      return {
+        label: 'Sold',
+        color: '#6B7280',
+        bgColor: '#F3F4F6',
+        icon: 'check-all'
+      };
     default:
       return {
         label: status,
@@ -113,5 +141,5 @@ export const getSellerStatusConfig = (status: string): StatusConfig => {
  * Check if chat input should be disabled based on status
  */
 export const isChatDisabled = (status: string): boolean => {
-  return status === 'COMPLETED' || status === 'REJECTED';
+  return status === 'COMPLETED' || status === 'REJECTED' || status === 'SOLD';
 };

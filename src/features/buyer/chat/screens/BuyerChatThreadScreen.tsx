@@ -76,15 +76,13 @@ const BuyerChatThreadScreen = () => {
     try {
       const updatedBooking = await sendMessage(requestId, userId, message);
 
-      // For car: merge conversation only (API returns partial data)
-      if (entityType === 'car' && booking) {
+      // Only update conversation - status doesn't change during normal chat
+      // Status changes only at: first message (auto-accept) + button press
+      if (booking) {
         updateBooking({
           ...booking,
           conversation: updatedBooking.conversation,
         });
-      } else {
-        // For mobile/laptop: full booking update
-        updateBooking(updatedBooking);
       }
     } catch (err: any) {
       console.error('[CHAT_THREAD] Error sending message:', err);

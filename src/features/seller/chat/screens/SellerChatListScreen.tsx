@@ -52,7 +52,7 @@ const CHAT_CATEGORIES: ChatCategory[] = [
     icon: 'motorbike',
     emoji: '🏍️',
     color: '#F59E0B',
-    enabled: false,
+    enabled: true,
   },
 ];
 

@@ -33,7 +33,13 @@ export function useSellerBookings<TEntity = any>(
     setError(null);
     try {
       const data = await api.getSellerBookings(sellerId);
-      setBookings(data);
+      // Sort by createdAt descending (newest first)
+      const sortedData = data.sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return dateB - dateA; // Descending order
+      });
+      setBookings(sortedData);
     } catch (err: any) {
       setError(err.message || 'Failed to load bookings');
       console.error(`[useSellerBookings:${entityType}]`, err);
