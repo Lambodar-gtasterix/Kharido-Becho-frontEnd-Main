@@ -101,15 +101,15 @@ export const mobileDetailsSchema = z.object({
 export type MobileDetailsFormValues = z.infer<typeof mobileDetailsSchema>;
 
 export const getDefaultMobileDetailsValues = (): MobileDetailsFormValues => ({
-  title: 'Samsung Galaxy S21 Ultra 5G',
-  description: 'Lightly used flagship smartphone with 108MP camera, 5000mAh battery, and 12GB RAM.',
-  price: '49999',
-  negotiable: undefined as any,
-  condition: undefined as any,
-  brand: 'Samsung',
-  model: 'Galaxy S21 Ultra',
-  color: 'Phantom Black',
-  yearOfPurchase: '2022',
+    title: null,
+    description: null,
+    price: null,
+    negotiable: null,
+    condition: null,
+    brand: null,
+    model: null,
+    color: null,
+    yearOfPurchase: null,
 
 });
 

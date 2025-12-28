@@ -9,6 +9,7 @@ import { colors } from '@theme/tokens';
 
 interface MobileFieldConfigOptions {
   onOpenYearPicker: () => void;
+  onOpenColorPicker: () => void;
 }
 
 type MobileCondition = 'NEW' | 'USED' | 'REFURBISHED';
@@ -31,6 +32,7 @@ const wordCount = (s: string): number => {
 
 export const getMobileDetailsFieldConfig = ({
   onOpenYearPicker,
+  onOpenColorPicker,
 }: MobileFieldConfigOptions): Array<FormFieldConfig<MobileDetailsFormValues>> => [
   {
     field: 'title',
@@ -55,24 +57,6 @@ export const getMobileDetailsFieldConfig = ({
     getLabelAccessory: ({ values }) => {
       const count = wordCount(values.description || '');
       return <Text style={styles.charCount}>{count}/70 words</Text>;
-    },
-  },
-  {
-    field: 'price',
-    label: 'Price',
-    component: 'text',
-    required: true,
-    props: {
-      placeholder: 'Enter price in ₹',
-      keyboardType: 'decimal-pad' as const,
-      maxLength: 11,
-    },
-    transform: (value: string) => {
-      // Allow digits and a single dot; keep at most 2 decimals
-      return value
-        .replace(/[^\d.]/g, '')
-        .replace(/^(\d*\.?\d{0,2}).*$/, '$1')
-        .replace(/(\..*)\./g, '$1');
     },
   },
   {
@@ -111,12 +95,11 @@ export const getMobileDetailsFieldConfig = ({
   {
     field: 'color',
     label: 'Color',
-    component: 'text',
+    component: 'readonlyPicker',
     required: true,
     props: {
-      placeholder: 'e.g., Sierra Blue or #1a2b3c',
-      autoCapitalize: 'words' as const,
-      maxLength: 30,
+      placeholder: 'Select color',
+      onPress: onOpenColorPicker,
     },
   },
   {
@@ -136,6 +119,24 @@ export const getMobileDetailsFieldConfig = ({
     required: true,
     props: {
       data: negotiableOptions,
+    },
+  },
+  {
+    field: 'price',
+    label: 'Price',
+    component: 'text',
+    required: true,
+    props: {
+      placeholder: 'Enter price in ₹',
+      keyboardType: 'decimal-pad' as const,
+      maxLength: 11,
+    },
+    transform: (value: string) => {
+      // Allow digits and a single dot; keep at most 2 decimals
+      return value
+        .replace(/[^\d.]/g, '')
+        .replace(/^(\d*\.?\d{0,2}).*$/, '$1')
+        .replace(/(\..*)\./g, '$1');
     },
   },
 ];

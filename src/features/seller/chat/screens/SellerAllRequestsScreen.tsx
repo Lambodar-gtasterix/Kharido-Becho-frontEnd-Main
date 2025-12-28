@@ -1,4 +1,4 @@
-// src/features/seller/chat/screens/SellerRequestListScreen.tsx
+// src/features/seller/chat/screens/SellerAllRequestsScreen.tsx
 
 import React, { useState } from 'react';
 import {
@@ -13,32 +13,33 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useEntityBookings } from '@core/booking/hooks';
-import { MobileEntity } from '@core/booking/types/entity.types';
+import { useSellerBookings } from '@core/booking/hooks/useSellerBookings';
+import { useAuth } from '@context/AuthContext';
+import { EntityType } from '@core/booking/types/entity.types';
 import BuyerRequestCard from '../components/BuyerRequestCard';
 
 interface RouteParams {
-  mobileId?: number;
-  laptopId?: number;
-  mobileTitle?: string;
-  laptopTitle?: string;
-  entityType?: 'mobile' | 'laptop' | 'car';
+  entityType: EntityType;
+  entityName: string;
 }
 
-const SellerRequestListScreen = () => {
+const ENTITY_ICONS: Record<EntityType, string> = {
+  mobile: 'cellphone',
+  laptop: 'laptop',
+  car: 'car',
+  bike: 'motorbike',
+};
+
+const SellerAllRequestsScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { mobileId, laptopId, mobileTitle, laptopTitle, entityType = 'mobile' } = route.params as RouteParams;
-
+  const { sellerId } = useAuth();
+  const { entityType, entityName } = route.params as RouteParams;
   const [refreshing, setRefreshing] = useState(false);
 
-  const entityId = mobileId || laptopId || 0;
-  const entityTitle = mobileTitle || laptopTitle || `${entityType} #${entityId}`;
-
-  // Use generic booking hook
-  const { bookings: requests, loading, error, refresh } = useEntityBookings<MobileEntity>({
+  const { bookings: requests, loading, error, refresh } = useSellerBookings({
     entityType,
-    entityId,
+    sellerId: sellerId || 0,
   });
 
   const onRefresh = async () => {
@@ -48,19 +49,21 @@ const SellerRequestListScreen = () => {
   };
 
   const handleRequestPress = (request: any) => {
-    navigation.navigate('SellerChatThread' as never, {
+    const params: any = {
       requestId: request.bookingId || request.requestId,
       buyerId: request.buyerId,
       buyerName: request.buyerName,
-      mobileId: mobileId,
-      laptopId: laptopId,
-      mobileTitle: mobileTitle,
-      laptopTitle: laptopTitle,
       entityType,
-    } as never);
+    };
+
+    if (entityType === 'mobile') params.mobileId = request.entityId;
+    if (entityType === 'laptop') params.laptopId = request.entityId;
+    if (entityType === 'car') params.carId = request.entityId;
+    if (entityType === 'bike') params.bikeId = request.entityId;
+
+    navigation.navigate('SellerChatThread' as never, params as never);
   };
 
-  // Render header
   const renderHeader = () => (
     <View style={styles.header}>
       <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
@@ -68,7 +71,7 @@ const SellerRequestListScreen = () => {
       </TouchableOpacity>
 
       <View style={styles.headerInfo}>
-        <Text style={styles.headerTitle}>{entityTitle}</Text>
+        <Text style={styles.headerTitle}>{entityName} Requests</Text>
         <Text style={styles.headerSubtitle}>
           {requests.length} {requests.length === 1 ? 'Request' : 'Requests'}
         </Text>
@@ -80,21 +83,19 @@ const SellerRequestListScreen = () => {
     </View>
   );
 
-  // Render empty state
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
       <View style={styles.emptyIconContainer}>
-        <Icon name="account-multiple-outline" size={64} color="#CBD5E1" />
+        <Icon name={ENTITY_ICONS[entityType]} size={64} color="#CBD5E1" />
       </View>
-      <Text style={styles.emptyTitle}>No requests yet</Text>
+      <Text style={styles.emptyTitle}>No {entityName.toLowerCase()} requests yet</Text>
       <Text style={styles.emptySubtitle}>
-        When buyers send you chat requests for this {entityType},{'\n'}
+        When buyers send you requests for your {entityName.toLowerCase()},{'\n'}
         they'll appear here
       </Text>
     </View>
   );
 
-  // Render error state
   const renderErrorState = () => (
     <View style={styles.emptyContainer}>
       <View style={styles.errorIconContainer}>
@@ -109,7 +110,6 @@ const SellerRequestListScreen = () => {
     </View>
   );
 
-  // Loading state
   if (loading) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
@@ -262,4 +262,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SellerRequestListScreen;
+export default SellerAllRequestsScreen;

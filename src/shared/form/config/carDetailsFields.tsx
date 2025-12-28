@@ -16,6 +16,7 @@ import { colors } from '@theme/tokens';
 
 interface CarFieldConfigOptions {
   onOpenYearPicker: () => void;
+  onOpenInsuranceDatePicker: () => void;
 }
 
 const booleanOptions: DropdownOption<boolean>[] = [
@@ -51,6 +52,7 @@ const numericOnly = (value: string) => value.replace(/[^0-9]/g, '');
 
 export const getCarDetailsFieldConfig = ({
   onOpenYearPicker,
+  onOpenInsuranceDatePicker,
 }: CarFieldConfigOptions): Array<FormFieldConfig<CarDetailsFormValues>> => [
   {
     field: 'title',
@@ -76,28 +78,6 @@ export const getCarDetailsFieldConfig = ({
     getLabelAccessory: ({ values }) => (
       <Text style={styles.charCount}>{values.description.length}/600</Text>
     ),
-  },
-  {
-    field: 'price',
-    label: 'Price',
-    component: 'text',
-    required: true,
-    props: {
-      placeholder: 'Enter price (e.g., 1850000)',
-      keyboardType: 'numeric' as const,
-      maxLength: 9,
-    },
-    transform: numericOnly,
-  },
-  {
-    field: 'negotiable',
-    label: 'Negotiable',
-    component: 'dropdown',
-    required: true,
-    props: {
-      data: booleanOptions,
-      placeholder: 'Select option',
-    },
   },
   {
     field: 'condition',
@@ -271,12 +251,11 @@ export const getCarDetailsFieldConfig = ({
   {
     field: 'carInsuranceDate',
     label: 'Insurance Valid Till',
-    component: 'text',
+    component: 'readonlyPicker',
     required: false,
     props: {
-      placeholder: 'e.g., 2025-08-15',
-      autoCapitalize: 'none' as const,
-      maxLength: 20,
+      placeholder: 'Select date',
+      onPress: onOpenInsuranceDatePicker,
     },
   },
   {
@@ -379,6 +358,28 @@ export const getCarDetailsFieldConfig = ({
       data: booleanOptions,
       placeholder: 'Select option',
     },
+  },
+  {
+    field: 'negotiable',
+    label: 'Negotiable',
+    component: 'dropdown',
+    required: true,
+    props: {
+      data: booleanOptions,
+      placeholder: 'Select option',
+    },
+  },
+  {
+    field: 'price',
+    label: 'Price',
+    component: 'text',
+    required: true,
+    props: {
+      placeholder: 'Enter price (e.g., 1850000)',
+      keyboardType: 'numeric' as const,
+      maxLength: 9,
+    },
+    transform: numericOnly,
   },
 ];
 

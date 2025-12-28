@@ -71,9 +71,21 @@ const MyBikeAdsListScreen: React.FC = () => {
 
   useFocusEffect(
     useCallback(() => {
+      // Show bottom tab bar when this screen is focused
+      let parent = navigation.getParent();
+      while (parent) {
+        if (parent.getState()?.type === 'tab') {
+          parent.setOptions({
+            tabBarStyle: undefined,
+          });
+          break;
+        }
+        parent = parent.getParent();
+      }
+
       fetchData(true);
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [navigation])
   );
 
   const onRefresh = async () => {

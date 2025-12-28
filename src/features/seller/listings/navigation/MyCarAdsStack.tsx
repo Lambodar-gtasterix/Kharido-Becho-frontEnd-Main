@@ -24,6 +24,21 @@ export default function MyCarAdsStack() {
       <Stack.Screen
         name="ProductDetails"
         component={CarDetailsScreen}
+        listeners={({ navigation }) => ({
+          focus: () => {
+            // Hide bottom tab bar on details screen
+            let parent = navigation.getParent();
+            while (parent) {
+              if (parent.getState()?.type === 'tab') {
+                parent.setOptions({
+                  tabBarStyle: { display: 'none' },
+                });
+                break;
+              }
+              parent = parent.getParent();
+            }
+          },
+        })}
       />
       <Stack.Screen
         name="UpdateCar"

@@ -83,8 +83,20 @@ const MyLaptopAdsListScreen: React.FC = () => {
 
   useFocusEffect(
     useCallback(() => {
+      // Show bottom tab bar when this screen is focused
+      let parent = navigation.getParent();
+      while (parent) {
+        if (parent.getState()?.type === 'tab') {
+          parent.setOptions({
+            tabBarStyle: undefined,
+          });
+          break;
+        }
+        parent = parent.getParent();
+      }
+
       fetchData();
-    }, [fetchData])
+    }, [fetchData, navigation])
   );
 
   const onRefresh = async () => {
@@ -140,7 +152,7 @@ const MyLaptopAdsListScreen: React.FC = () => {
   }, [selectedLaptop, deleting, closeMenu, fetchData]);
 
   const handleChatPress = useCallback((laptop: LaptopItem) => {
-    (navigation as any).navigate('SellerRequestList', {
+    (navigation as any).navigate('SellerAdRequests', {
       laptopId: laptop.id,
       laptopTitle: [laptop.brand, laptop.model].filter(Boolean).join(' ') || `Laptop #${laptop.id}`,
       entityType: 'laptop',

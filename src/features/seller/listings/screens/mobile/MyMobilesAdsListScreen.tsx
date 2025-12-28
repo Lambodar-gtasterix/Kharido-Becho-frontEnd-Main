@@ -64,9 +64,21 @@ const MyMobilesAdsListScreen: React.FC = () => {
 
   useFocusEffect(
     useCallback(() => {
+      // Show bottom tab bar when this screen is focused
+      let parent = navigation.getParent();
+      while (parent) {
+        if (parent.getState()?.type === 'tab') {
+          parent.setOptions({
+            tabBarStyle: undefined,
+          });
+          break;
+        }
+        parent = parent.getParent();
+      }
+
       fetchData(true);
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [navigation])
   );
 
   const onRefresh = async () => {
@@ -123,8 +135,8 @@ const MyMobilesAdsListScreen: React.FC = () => {
 
   const handleChatPress = useCallback((mobile: MobileListing) => {
     // Navigate directly to request list screen
-    // The SellerRequestListScreen will handle loading and empty state
-    (navigation as any).navigate('SellerRequestList', {
+    // The SellerAdRequestsScreen will handle loading and empty state
+    (navigation as any).navigate('SellerAdRequests', {
       mobileId: mobile.mobileId,
       mobileTitle: mobile.title || 'Mobile',
     });

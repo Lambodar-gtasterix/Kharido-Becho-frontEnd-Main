@@ -242,6 +242,10 @@ export function createBookingApi<TEntity = any>(
     },
 
     async rejectBooking(bookingId: number): Promise<Booking<TEntity>> {
+      // Mobile uses updateStatus endpoint with status parameter
+      if (entityType === 'mobile') {
+        return this.updateStatus(bookingId, 'REJECTED');
+      }
       // Car uses query params, others use path params
       if (entityType === 'car') {
         const response = await api.patch<any>(endpoints.rejectBooking(bookingId), null, {

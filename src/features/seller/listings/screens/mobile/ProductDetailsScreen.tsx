@@ -134,8 +134,8 @@ const ProductDetailsScreen: React.FC = () => {
 
   const handleChatPress = useCallback(() => {
     // Navigate directly to request list screen
-    // The SellerRequestListScreen will handle loading and empty state
-    (navigation as any).navigate('SellerRequestList', {
+    // The SellerAdRequestsScreen will handle loading and empty state
+    (navigation as any).navigate('SellerAdRequests', {
       mobileId: mobileId,
       mobileTitle: titleText,
     });

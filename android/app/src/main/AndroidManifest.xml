@@ -3,12 +3,13 @@
     <!-- Internet already here -->
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- ✅ Add permissions for camera and storage access -->
-    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Storage permissions for gallery access -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="29" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
+    <!-- Note: CAMERA permission removed - react-native-image-picker v8+ handles it automatically -->
 
     <application
         android:name=".MainApplication"

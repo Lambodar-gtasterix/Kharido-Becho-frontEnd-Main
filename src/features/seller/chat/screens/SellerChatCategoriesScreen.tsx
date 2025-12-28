@@ -1,4 +1,4 @@
-// src/features/seller/chat/screens/SellerChatListScreen.tsx
+// src/features/seller/chat/screens/SellerChatCategoriesScreen.tsx
 
 import React from 'react';
 import {
@@ -28,7 +28,7 @@ const CHAT_CATEGORIES: ChatCategory[] = [
     icon: 'cellphone',
     emoji: '📱',
     color: '#3B82F6',
-    enabled: false,
+    enabled: true,
   },
   {
     id: 'laptop',
@@ -56,7 +56,7 @@ const CHAT_CATEGORIES: ChatCategory[] = [
   },
 ];
 
-const SellerChatListScreen = () => {
+const SellerChatCategoriesScreen = () => {
   const navigation = useNavigation();
 
   const handleCategoryPress = (category: ChatCategory) => {
@@ -64,7 +64,7 @@ const SellerChatListScreen = () => {
       return;
     }
 
-    (navigation as any).navigate('SellerEntityRequests', {
+    (navigation as any).navigate('SellerAllRequests', {
       entityType: category.id,
       entityName: category.name,
     });
@@ -212,4 +212,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SellerChatListScreen;
+export default SellerChatCategoriesScreen;

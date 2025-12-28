@@ -23,6 +23,7 @@ const ENDPOINT_CONFIGS: Record<EntityType, EndpointConfig> = {
     getBuyerBookings: (buyerId) => `/api/v1/mobile/requests/buyer/${buyerId}`,
     getBookingById: (bookingId) => `/api/v1/mobile/requests/${bookingId}`,
     getEntityBookings: (mobileId) => `/api/v1/mobile/requests/${mobileId}`,
+    getSellerBookings: (sellerId) => `/api/v1/mobile/requests/seller/${sellerId}`,
     getPendingBookings: '/api/v1/mobile/requests/pending',
     sendMessage: (bookingId) => `/api/v1/mobile/requests/${bookingId}/message`,
     updateStatus: (bookingId) => `/api/v1/mobile/requests/${bookingId}/status`,

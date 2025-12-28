@@ -1,9 +1,10 @@
 // src/screens/CarScreens/AddCarDetailsScreen.tsx
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, View } from 'react-native';
+import { Alert, Platform, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 import SellFlowLayout from '../common/SellFlowLayout';
 import {
@@ -58,6 +59,7 @@ const AddCarDetailsScreen: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [yearPickerVisible, setYearPickerVisible] = useState(false);
+  const [insuranceDatePickerVisible, setInsuranceDatePickerVisible] = useState(false);
 
   useEffect(() => {
     if (values.carInsurance === false) {
@@ -87,6 +89,7 @@ const AddCarDetailsScreen: React.FC = () => {
     () =>
       getCarDetailsFieldConfig({
         onOpenYearPicker: () => setYearPickerVisible(true),
+        onOpenInsuranceDatePicker: () => setInsuranceDatePickerVisible(true),
       }),
     [],
   );
@@ -250,6 +253,27 @@ const AddCarDetailsScreen: React.FC = () => {
         }}
         onClose={() => setYearPickerVisible(false)}
       />
+
+      {insuranceDatePickerVisible && (
+        <DateTimePicker
+          value={
+            values.carInsuranceDate
+              ? new Date(values.carInsuranceDate)
+              : new Date()
+          }
+          mode="date"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={(event, selectedDate) => {
+            setInsuranceDatePickerVisible(Platform.OS === 'ios');
+            if (event.type === 'set' && selectedDate) {
+              const formattedDate = selectedDate.toISOString().split('T')[0];
+              touchField('carInsuranceDate');
+              setFieldValue('carInsuranceDate', formattedDate, { validate: true });
+            }
+          }}
+          minimumDate={new Date()}
+        />
+      )}
     </>
   );
 };

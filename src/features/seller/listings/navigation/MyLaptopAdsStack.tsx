@@ -5,14 +5,14 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MyLaptopAdsListScreen from '@features/seller/listings/screens/laptop/MyLaptopAdsListScreen';
 import LaptopDetailsScreen from '@features/seller/listings/screens/laptop/LaptopDetailsScreen';
 import UpdateLaptopScreen from '@features/seller/listings/screens/laptop/UpdateLaptopScreen';
-import SellerRequestListScreen from '@features/seller/chat/screens/SellerRequestListScreen';
+import SellerAdRequestsScreen from '@features/seller/chat/screens/SellerAdRequestsScreen';
 import SellerChatThreadScreen from '@features/seller/chat/screens/SellerChatThreadScreen';
 
 export type MyLaptopAdsStackParamList = {
   MyLaptopAdsList: undefined;
   LaptopDetails: { laptopId: number };
   UpdateLaptop: { laptopId: number };
-  SellerRequestList: { laptopId: number; laptopTitle?: string; entityType?: string };
+  SellerAdRequests: { laptopId: number; laptopTitle?: string; entityType?: string };
   SellerChatThread: { requestId: number; buyerId: number; laptopId?: number; laptopTitle?: string; entityType?: string };
 };
 
@@ -28,6 +28,21 @@ export default function MyLaptopAdsStack() {
       <Stack.Screen
         name="LaptopDetails"
         component={LaptopDetailsScreen}
+        listeners={({ navigation }) => ({
+          focus: () => {
+            // Hide bottom tab bar on details screen
+            let parent = navigation.getParent();
+            while (parent) {
+              if (parent.getState()?.type === 'tab') {
+                parent.setOptions({
+                  tabBarStyle: { display: 'none' },
+                });
+                break;
+              }
+              parent = parent.getParent();
+            }
+          },
+        })}
       />
       <Stack.Screen
         name="UpdateLaptop"
@@ -63,8 +78,8 @@ export default function MyLaptopAdsStack() {
         })}
       />
       <Stack.Screen
-        name="SellerRequestList"
-        component={SellerRequestListScreen}
+        name="SellerAdRequests"
+        component={SellerAdRequestsScreen}
       />
       <Stack.Screen
         name="SellerChatThread"

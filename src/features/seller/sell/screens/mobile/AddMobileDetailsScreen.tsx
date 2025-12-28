@@ -59,6 +59,7 @@ const AddMobileDetailsScreen: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [yearPickerVisible, setYearPickerVisible] = useState(false);
+  const [colorPickerVisible, setColorPickerVisible] = useState(false);
 
   const yearOptions = useMemo<BottomSheetPickerOption<string>[]>(() => {
     const years: BottomSheetPickerOption<string>[] = [];
@@ -69,10 +70,30 @@ const AddMobileDetailsScreen: React.FC = () => {
     return years;
   }, []);
 
+  const colorOptions = useMemo<BottomSheetPickerOption<string>[]>(() => [
+    { label: 'Midnight Black', value: 'Midnight Black' },
+    { label: 'Starlight White', value: 'Starlight White' },
+    { label: 'Space Gray', value: 'Space Gray' },
+    { label: 'Sierra Blue', value: 'Sierra Blue' },
+    { label: 'Deep Purple', value: 'Deep Purple' },
+    { label: 'Alpine Green', value: 'Alpine Green' },
+    { label: 'Phantom Black', value: 'Phantom Black' },
+    { label: 'Phantom Silver', value: 'Phantom Silver' },
+    { label: 'Mystic Bronze', value: 'Mystic Bronze' },
+    { label: 'Cloud Blue', value: 'Cloud Blue' },
+    { label: 'Rose Gold', value: 'Rose Gold' },
+    { label: 'Graphite', value: 'Graphite' },
+    { label: 'Gold', value: 'Gold' },
+    { label: 'Silver', value: 'Silver' },
+    { label: 'Product Red', value: 'Product Red' },
+    { label: 'Other', value: 'OTHER' },
+  ], []);
+
   const fieldConfig = useMemo(
     () =>
       getMobileDetailsFieldConfig({
         onOpenYearPicker: () => setYearPickerVisible(true),
+        onOpenColorPicker: () => setColorPickerVisible(true),
       }),
     [],
   );
@@ -230,6 +251,45 @@ const AddMobileDetailsScreen: React.FC = () => {
           setFieldValue('yearOfPurchase', year, { validate: true });
         }}
         onClose={() => setYearPickerVisible(false)}
+      />
+
+      <BottomSheetPicker
+        visible={colorPickerVisible}
+        title="Select Color"
+        options={colorOptions}
+        selectedValue={values.color === 'OTHER' ? 'OTHER' : values.color}
+        onSelect={(color) => {
+          if (color === 'OTHER') {
+            setColorPickerVisible(false);
+            setTimeout(() => {
+              Alert.prompt(
+                'Enter Custom Color',
+                'Please enter your mobile color',
+                [
+                  {
+                    text: 'Cancel',
+                    style: 'cancel',
+                  },
+                  {
+                    text: 'OK',
+                    onPress: (customColor) => {
+                      if (customColor && customColor.trim()) {
+                        touchField('color');
+                        setFieldValue('color', customColor.trim(), { validate: true });
+                      }
+                    },
+                  },
+                ],
+                'plain-text',
+                values.color && values.color !== 'OTHER' ? values.color : '',
+              );
+            }, 300);
+          } else {
+            touchField('color');
+            setFieldValue('color', color, { validate: true });
+          }
+        }}
+        onClose={() => setColorPickerVisible(false)}
       />
     </>
   );

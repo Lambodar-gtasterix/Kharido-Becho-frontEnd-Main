@@ -9,8 +9,8 @@ import SellerHomeScreen from '../home/screens/SellerHomeScreen';
 import SellEntryStack from '../sell/navigation/SellEntryStack';
 import MyAdsEntryStack from '../listings/navigation/MyAdsEntryStack';
 import ProfileScreen from '../../shared/profile/screens/ProfileScreen';
-import SellerChatListScreen from '../chat/screens/SellerChatListScreen';
-import SellerEntityRequestsScreen from '../chat/screens/SellerEntityRequestsScreen';
+import SellerChatCategoriesScreen from '../chat/screens/SellerChatCategoriesScreen';
+import SellerAllRequestsScreen from '../chat/screens/SellerAllRequestsScreen';
 import SellerChatThreadScreen from '../chat/screens/SellerChatThreadScreen';
 
 const Tab = createBottomTabNavigator();
@@ -18,8 +18,8 @@ const Stack = createStackNavigator();
 
 const ChatStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
-    <Stack.Screen name="SellerChats" component={SellerChatListScreen} />
-    <Stack.Screen name="SellerEntityRequests" component={SellerEntityRequestsScreen} />
+    <Stack.Screen name="SellerChats" component={SellerChatCategoriesScreen} />
+    <Stack.Screen name="SellerAllRequests" component={SellerAllRequestsScreen} />
     <Stack.Screen name="SellerChatThread" component={SellerChatThreadScreen} />
   </Stack.Navigator>
 );
@@ -80,7 +80,7 @@ const SellerTabNavigator = () => {
         component={ChatStack}
         options={({ route }) => {
           const routeName = getFocusedRouteNameFromRoute(route) ?? 'SellerChats';
-          const hideTabBar = routeName === 'SellerEntityRequests' || routeName === 'SellerChatThread';
+          const hideTabBar = routeName === 'SellerAllRequests' || routeName === 'SellerChatThread';
 
           return {
             tabBarLabel: 'Chats',

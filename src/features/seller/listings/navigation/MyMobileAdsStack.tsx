@@ -4,14 +4,14 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MyMobilesAdsListScreen from '@features/seller/listings/screens/mobile/MyMobilesAdsListScreen';
 import ProductDetailsScreen from '@features/seller/listings/screens/mobile/ProductDetailsScreen';
 import UpdateMobileScreen from '@features/seller/listings/screens/mobile/UpdateMobileScreen';
-import SellerRequestListScreen from '@features/seller/chat/screens/SellerRequestListScreen';
+import SellerAdRequestsScreen from '@features/seller/chat/screens/SellerAdRequestsScreen';
 import SellerChatThreadScreen from '@features/seller/chat/screens/SellerChatThreadScreen';
 
 export type MyMobileAdsStackParamList = {
   MyMobilesAdsList: undefined;
   ProductDetails: { mobileId: number };
   UpdateMobile: { mobileId: number };
-  SellerRequestList: { mobileId: number; mobileTitle?: string };
+  SellerAdRequests: { mobileId: number; mobileTitle?: string };
   SellerChatThread: { requestId: number; buyerId: number; mobileId?: number; mobileTitle?: string };
 };
 
@@ -29,24 +29,12 @@ export default function MyMobileAdsStack() {
         component={ProductDetailsScreen}
         listeners={({ navigation }) => ({
           focus: () => {
-            // Find the tab navigator by going up the hierarchy
+            // Hide bottom tab bar on details screen
             let parent = navigation.getParent();
             while (parent) {
               if (parent.getState()?.type === 'tab') {
                 parent.setOptions({
                   tabBarStyle: { display: 'none' },
-                });
-                break;
-              }
-              parent = parent.getParent();
-            }
-          },
-          blur: () => {
-            let parent = navigation.getParent();
-            while (parent) {
-              if (parent.getState()?.type === 'tab') {
-                parent.setOptions({
-                  tabBarStyle: undefined,
                 });
                 break;
               }
@@ -89,8 +77,8 @@ export default function MyMobileAdsStack() {
         })}
       />
       <Stack.Screen
-        name="SellerRequestList"
-        component={SellerRequestListScreen}
+        name="SellerAdRequests"
+        component={SellerAdRequestsScreen}
       />
       <Stack.Screen
         name="SellerChatThread"
