@@ -125,13 +125,13 @@ const StatusActionButtons: React.FC<StatusActionButtonsProps> = ({
     );
   }
 
-  // PENDING status - Show Accept and Reject (for mobile/laptop)
+  // PENDING status - Show Accept and Reject DISABLED (for mobile/laptop)
   if (currentStatus === 'PENDING' && entityType !== 'car') {
     return (
       <View style={styles.container}>
         <TouchableOpacity
-          style={[styles.button, styles.acceptButton]}
-          onPress={handleAccept}
+          style={[styles.button, styles.acceptButton, styles.disabledButton]}
+          disabled={true}
           activeOpacity={0.8}
         >
           <Icon name="check-circle" size={18} color="#FFFFFF" />
@@ -139,12 +139,12 @@ const StatusActionButtons: React.FC<StatusActionButtonsProps> = ({
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.button, styles.rejectButton]}
-          onPress={handleReject}
+          style={[styles.button, styles.rejectButton, styles.disabledButton]}
+          disabled={true}
           activeOpacity={0.8}
         >
-          <Icon name="close-circle" size={18} color="#EF4444" />
-          <Text style={styles.rejectButtonText}>Reject</Text>
+          <Icon name="close-circle" size={18} color="#94A3B8" />
+          <Text style={[styles.rejectButtonText, { color: '#94A3B8' }]}>Reject</Text>
         </TouchableOpacity>
       </View>
     );
@@ -247,6 +247,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
     fontWeight: '500',
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
 });
 

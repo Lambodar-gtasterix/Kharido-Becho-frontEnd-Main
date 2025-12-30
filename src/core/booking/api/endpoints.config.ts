@@ -55,7 +55,7 @@ const ENDPOINT_CONFIGS: Record<EntityType, EndpointConfig> = {
   laptop: {
     createBooking: '/api/laptopBookings/create',
     getBuyerBookings: (buyerId) => `/api/laptopBookings/buyer/${buyerId}`,
-    getBookingById: (bookingId) => `/api/laptopBookings/booking/${bookingId}`,
+    getBookingById: (bookingId) => `/api/laptopBookings/laptop-bookings/${bookingId}`,
     getEntityBookings: (laptopId) => `/api/laptopBookings/${laptopId}`,
     getSellerBookings: (sellerId) => `/api/laptopBookings/seller/${sellerId}`,
     getPendingBookings: '/api/laptopBookings/pending',

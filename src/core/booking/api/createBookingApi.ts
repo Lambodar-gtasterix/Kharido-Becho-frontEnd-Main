@@ -92,9 +92,18 @@ export function createBookingApi<TEntity = any>(
 
     async getBookingById(bookingId: number, contextId: number): Promise<Booking<TEntity>> {
       // ========================================
-      // CAR/LAPTOP/BIKE BOOKING BLOCK - Direct API call
+      // LAPTOP BOOKING BLOCK - Returns array
       // ========================================
-      if (entityType === 'car' || entityType === 'laptop' || entityType === 'bike') {
+      if (entityType === 'laptop') {
+        const response = await api.get<any>(endpoints.getBookingById(bookingId));
+        const bookingData = Array.isArray(response.data) ? response.data[0] : response.data;
+        return normalizeBooking(bookingData, entityType);
+      }
+
+      // ========================================
+      // CAR/BIKE BOOKING BLOCK - Direct API call
+      // ========================================
+      if (entityType === 'car' || entityType === 'bike') {
         const response = await api.get<any>(endpoints.getBookingById(bookingId));
         return normalizeBooking(response.data, entityType);
       }
@@ -230,6 +239,10 @@ export function createBookingApi<TEntity = any>(
     },
 
     async acceptBooking(bookingId: number): Promise<Booking<TEntity>> {
+      // Mobile and Laptop use updateStatus endpoint with status parameter
+      if (entityType === 'mobile' || entityType === 'laptop') {
+        return this.updateStatus(bookingId, 'ACCEPTED');
+      }
       // Car uses query params, others use path params
       if (entityType === 'car') {
         const response = await api.patch<any>(endpoints.acceptBooking(bookingId), null, {
@@ -242,8 +255,8 @@ export function createBookingApi<TEntity = any>(
     },
 
     async rejectBooking(bookingId: number): Promise<Booking<TEntity>> {
-      // Mobile uses updateStatus endpoint with status parameter
-      if (entityType === 'mobile') {
+      // Mobile and Laptop use updateStatus endpoint with status parameter
+      if (entityType === 'mobile' || entityType === 'laptop') {
         return this.updateStatus(bookingId, 'REJECTED');
       }
       // Car uses query params, others use path params

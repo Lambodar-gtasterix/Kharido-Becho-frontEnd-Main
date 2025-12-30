@@ -16,6 +16,7 @@ import {
   DropdownField,
   DropdownOption,
   ReadonlyPickerInput,
+  AutocompleteField,
 } from '@shared/components';
 import { colors, spacing } from '@theme/tokens';
 import { useFormState } from '@shared/form/hooks/useFormState';
@@ -34,6 +35,8 @@ import { addMobile } from '@features/seller/sell/api/MobilesApi';
 import { useAuth } from '@context/AuthContext';
 import { SellMobileStackParamList } from '../../navigation/SellMobileStack';
 import { getFriendlyApiError } from '@shared/utils';
+import { useBrandAutocomplete } from '@core/mobile/hooks/useBrandAutocomplete';
+import { useModelAutocomplete } from '@core/mobile/hooks/useModelAutocomplete';
 
 type AddMobileDetailsScreenNavigationProp = NativeStackNavigationProp<
   SellMobileStackParamList,
@@ -60,6 +63,14 @@ const AddMobileDetailsScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [yearPickerVisible, setYearPickerVisible] = useState(false);
   const [colorPickerVisible, setColorPickerVisible] = useState(false);
+  const [modelFocused, setModelFocused] = useState(false);
+
+  const { brands, loading: brandsLoading } = useBrandAutocomplete(values.brand || '');
+  const { models, loading: modelsLoading } = useModelAutocomplete(
+    values.brand || '',
+    values.model || '',
+    modelFocused
+  );
 
   const yearOptions = useMemo<BottomSheetPickerOption<string>[]>(() => {
     const years: BottomSheetPickerOption<string>[] = [];
@@ -183,6 +194,54 @@ const AddMobileDetailsScreen: React.FC = () => {
             onPress={onPress ?? (() => {})}
             {...restProps}
           />
+        );
+      }
+      case 'autocomplete': {
+        const formattedValue = value == null ? '' : String(value);
+        const isBrandField = field === 'brand';
+        const options = isBrandField ? brands : models;
+        const autocompleteLoading = isBrandField ? brandsLoading : modelsLoading;
+
+        return (
+          <View key={String(field)} style={{ zIndex: isBrandField ? 2 : 1 }}>
+            <AutocompleteField
+              label={config.label}
+              value={formattedValue}
+              onChangeText={(text) => {
+                setFieldValue(field, text, { validate: Boolean(touched[field]) });
+                if (isBrandField && text !== values.brand) {
+                  setFieldValue('model', '', { validate: false });
+                  setModelFocused(false);
+                }
+              }}
+              onSelect={(option) => {
+                touchField(field);
+                setFieldValue(field, option, { validate: true });
+                if (isBrandField) {
+                  setFieldValue('model', '', { validate: false });
+                  setModelFocused(false);
+                }
+              }}
+              onFocus={() => {
+                if (!isBrandField) {
+                  setModelFocused(true);
+                }
+              }}
+              onBlur={() => {
+                handleBlur(field);
+                if (!isBrandField) {
+                  setTimeout(() => setModelFocused(false), 300);
+                }
+              }}
+              options={options}
+              loading={autocompleteLoading}
+              error={error}
+              required={config.required}
+              disabled={!isBrandField && !values.brand}
+              showOnFocus={!isBrandField}
+              {...config.props}
+            />
+          </View>
         );
       }
       default:

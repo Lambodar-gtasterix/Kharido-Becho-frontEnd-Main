@@ -20,3 +20,5 @@ export { default as ListingFormDropdown } from './form/ListingFormDropdown';
 export { default as ListingFormTextArea } from './form/ListingFormTextArea';
 export { default as ReadonlyPickerInput } from './form/ReadonlyPickerInput';
 export { default as ListingYearPickerField } from './form/ListingYearPickerField';
+export { AutocompleteField } from './AutocompleteField';
+export type { AutocompleteOption } from './AutocompleteField';

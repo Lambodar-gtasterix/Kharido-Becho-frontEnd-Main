@@ -1,7 +1,7 @@
 // src/form/config/types.ts
 import { ReactNode } from 'react';
 
-export type FormFieldComponentType = 'text' | 'textarea' | 'dropdown' | 'readonlyPicker';
+export type FormFieldComponentType = 'text' | 'textarea' | 'dropdown' | 'readonlyPicker' | 'autocomplete';
 
 export interface FormFieldContext<TValues> {
   values: TValues;

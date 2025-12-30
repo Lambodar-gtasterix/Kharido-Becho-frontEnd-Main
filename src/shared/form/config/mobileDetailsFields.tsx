@@ -71,25 +71,19 @@ export const getMobileDetailsFieldConfig = ({
   {
     field: 'brand',
     label: 'Brand',
-    component: 'text',
+    component: 'autocomplete',
     required: true,
     props: {
       placeholder: 'e.g., Apple, Samsung, OnePlus',
-      autoCapitalize: 'words' as const,
-      autoCorrect: false,
-      maxLength: 40,
     },
   },
   {
     field: 'model',
     label: 'Model',
-    component: 'text',
+    component: 'autocomplete',
     required: true,
     props: {
       placeholder: 'e.g., 15 Pro Max, Galaxy S24',
-      autoCapitalize: 'words' as const,
-      autoCorrect: false,
-      maxLength: 40,
     },
   },
   {
