@@ -71,19 +71,21 @@ export const getMobileDetailsFieldConfig = ({
   {
     field: 'brand',
     label: 'Brand',
-    component: 'autocomplete',
+    component: 'dropdown',
     required: true,
     props: {
-      placeholder: 'e.g., Apple, Samsung, OnePlus',
+      placeholder: 'Select brand',
+      data: [],
     },
   },
   {
     field: 'model',
     label: 'Model',
-    component: 'autocomplete',
+    component: 'dropdown',
     required: true,
     props: {
-      placeholder: 'e.g., 15 Pro Max, Galaxy S24',
+      placeholder: 'Select model',
+      data: [],
     },
   },
   {
@@ -113,6 +115,33 @@ export const getMobileDetailsFieldConfig = ({
     required: true,
     props: {
       data: negotiableOptions,
+    },
+  },
+  {
+    field: 'state',
+    label: 'State',
+    component: 'autocomplete',
+    required: true,
+    props: {
+      placeholder: 'Select state',
+    },
+  },
+  {
+    field: 'city',
+    label: 'City',
+    component: 'autocomplete',
+    required: true,
+    props: {
+      placeholder: 'Select city',
+    },
+  },
+  {
+    field: 'address',
+    label: 'Locality/Address',
+    component: 'autocomplete',
+    required: true,
+    props: {
+      placeholder: 'Select locality',
     },
   },
   {

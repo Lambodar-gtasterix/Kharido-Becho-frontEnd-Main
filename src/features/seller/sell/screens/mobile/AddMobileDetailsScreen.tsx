@@ -35,8 +35,9 @@ import { addMobile } from '@features/seller/sell/api/MobilesApi';
 import { useAuth } from '@context/AuthContext';
 import { SellMobileStackParamList } from '../../navigation/SellMobileStack';
 import { getFriendlyApiError } from '@shared/utils';
-import { useBrandAutocomplete } from '@core/mobile/hooks/useBrandAutocomplete';
-import { useModelAutocomplete } from '@core/mobile/hooks/useModelAutocomplete';
+import { useBrandAutocomplete } from '../../hooks/mobile/useBrandAutocomplete';
+import { useModelAutocomplete } from '../../hooks/mobile/useModelAutocomplete';
+import { useStates, useCities, useLocalities } from '@shared/hooks/useLocationData';
 
 type AddMobileDetailsScreenNavigationProp = NativeStackNavigationProp<
   SellMobileStackParamList,
@@ -63,14 +64,23 @@ const AddMobileDetailsScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [yearPickerVisible, setYearPickerVisible] = useState(false);
   const [colorPickerVisible, setColorPickerVisible] = useState(false);
-  const [modelFocused, setModelFocused] = useState(false);
+  const [selectedBrandId, setSelectedBrandId] = useState<number | null>(null);
+  const [stateFocused, setStateFocused] = useState(false);
+  const [cityFocused, setCityFocused] = useState(false);
+  const [localityFocused, setLocalityFocused] = useState(false);
 
-  const { brands, loading: brandsLoading } = useBrandAutocomplete(values.brand || '');
-  const { models, loading: modelsLoading } = useModelAutocomplete(
-    values.brand || '',
-    values.model || '',
-    modelFocused
+  const { brands, loading: brandsLoading, fetchBrands } = useBrandAutocomplete();
+  const { models, loading: modelsLoading, fetchModels } = useModelAutocomplete(selectedBrandId);
+
+  // Location hooks
+  const { states, loading: statesLoading } = useStates();
+  const { cities, loading: citiesLoading } = useCities(values.state || '', stateFocused || !!values.state);
+  const { localities, loading: localitiesLoading } = useLocalities(
+    values.state || '',
+    values.city || '',
+    cityFocused || !!(values.state && values.city)
   );
+
 
   const yearOptions = useMemo<BottomSheetPickerOption<string>[]>(() => {
     const years: BottomSheetPickerOption<string>[] = [];
@@ -109,11 +119,15 @@ const AddMobileDetailsScreen: React.FC = () => {
     [],
   );
 
-  const renderField = (config: FormFieldConfig<MobileDetailsFormValues>) => {
+  const renderField = (config: FormFieldConfig<MobileDetailsFormValues>, fieldIndex: number) => {
     const field = config.field;
     const value = values[field];
     const error = touched[field] ? errors[field] : undefined;
     const labelAccessory = config.getLabelAccessory?.({ values });
+
+    // Calculate z-index based on field position (reverse order so top fields have higher z-index)
+    // Use much higher values to ensure dropdown lists appear above everything
+    const baseZIndex = (fieldConfig.length - fieldIndex) * 100;
 
     switch (config.component) {
       case 'text': {
@@ -162,23 +176,59 @@ const AddMobileDetailsScreen: React.FC = () => {
       }
       case 'dropdown': {
         const props = config.props ?? {};
-        const data: DropdownOption<any>[] = props.data ?? [];
-        const { placeholder, ...restProps } = props;
+        let data: DropdownOption<any>[] = props.data ?? [];
+        let isDisabled = false;
+
+        // Handle dynamic brand/model dropdowns
+        if (field === 'brand') {
+          data = brands.map(b => ({ label: b.name, value: b.name }));
+          isDisabled = brandsLoading;
+        } else if (field === 'model') {
+          data = models.map(m => ({ label: m.name, value: m.name }));
+          isDisabled = !selectedBrandId || modelsLoading;
+        }
+
+        const { placeholder, data: _unused, ...restProps } = props;
+
         return (
-          <DropdownField
+          <View
             key={String(field)}
-            label={config.label}
-            data={data}
-            value={value as any}
-            onChange={(item) => {
-              touchField(field);
-              setFieldValue(field, item.value, { validate: true });
+            style={{
+              zIndex: baseZIndex,
+              elevation: baseZIndex,
             }}
-            required={config.required}
-            error={error}
-            placeholder={placeholder}
-            {...restProps}
-          />
+          >
+            <DropdownField
+              label={config.label}
+              data={data}
+              value={value as any}
+              onChange={(item) => {
+                touchField(field);
+                setFieldValue(field, item.value, { validate: true });
+
+                // Handle brand selection
+                if (field === 'brand') {
+                  const selectedBrand = brands.find(b => b.name === item.value);
+                  setSelectedBrandId(selectedBrand?.brandId || null);
+                  setFieldValue('model', '', { validate: false });
+                  setFieldValue('modelId', undefined, { validate: false });
+                } else if (field === 'model') {
+                  // Handle model selection - store the modelId
+                  const selectedModel = models.find(m => m.name === item.value);
+                  if (selectedModel) {
+                    setFieldValue('modelId', selectedModel.modelId, { validate: false });
+                  }
+                }
+              }}
+              onFocus={field === 'brand' ? fetchBrands : field === 'model' ? fetchModels : undefined}
+              required={config.required}
+              error={error}
+              placeholder={placeholder}
+              disabled={isDisabled}
+              search={false}
+              {...restProps}
+            />
+          </View>
         );
       }
       case 'readonlyPicker': {
@@ -198,47 +248,86 @@ const AddMobileDetailsScreen: React.FC = () => {
       }
       case 'autocomplete': {
         const formattedValue = value == null ? '' : String(value);
-        const isBrandField = field === 'brand';
-        const options = isBrandField ? brands : models;
-        const autocompleteLoading = isBrandField ? brandsLoading : modelsLoading;
+        const isStateField = field === 'state';
+        const isCityField = field === 'city';
+        const isLocalityField = field === 'address';
+
+        let options: string[] = [];
+        let autocompleteLoading = false;
+
+        if (isStateField) {
+          options = states;
+          autocompleteLoading = statesLoading;
+        } else if (isCityField) {
+          options = cities;
+          autocompleteLoading = citiesLoading;
+        } else if (isLocalityField) {
+          options = localities;
+          autocompleteLoading = localitiesLoading;
+        }
+
+        const zIndex = isStateField ? 997 : isCityField ? 996 : 995;
 
         return (
-          <View key={String(field)} style={{ zIndex: isBrandField ? 2 : 1 }}>
+          <View key={String(field)} style={{ zIndex }}>
             <AutocompleteField
               label={config.label}
               value={formattedValue}
               onChangeText={(text) => {
                 setFieldValue(field, text, { validate: Boolean(touched[field]) });
-                if (isBrandField && text !== values.brand) {
-                  setFieldValue('model', '', { validate: false });
-                  setModelFocused(false);
+                if (isStateField && text !== values.state) {
+                  setFieldValue('city', '', { validate: false });
+                  setFieldValue('address', '', { validate: false });
+                  setCityFocused(false);
+                  setLocalityFocused(false);
+                } else if (isCityField && text !== values.city) {
+                  setFieldValue('address', '', { validate: false });
+                  setLocalityFocused(false);
                 }
               }}
               onSelect={(option) => {
                 touchField(field);
                 setFieldValue(field, option, { validate: true });
-                if (isBrandField) {
-                  setFieldValue('model', '', { validate: false });
-                  setModelFocused(false);
+                if (isStateField) {
+                  setFieldValue('city', '', { validate: false });
+                  setFieldValue('address', '', { validate: false });
+                  setCityFocused(false);
+                  setLocalityFocused(false);
+                  setStateFocused(false);
+                } else if (isCityField) {
+                  setFieldValue('address', '', { validate: false });
+                  setLocalityFocused(false);
+                  setCityFocused(false);
                 }
               }}
               onFocus={() => {
-                if (!isBrandField) {
-                  setModelFocused(true);
+                if (isStateField) {
+                  setStateFocused(true);
+                } else if (isCityField) {
+                  setCityFocused(true);
+                } else if (isLocalityField) {
+                  setLocalityFocused(true);
                 }
               }}
               onBlur={() => {
                 handleBlur(field);
-                if (!isBrandField) {
-                  setTimeout(() => setModelFocused(false), 300);
+                if (isStateField) {
+                  setTimeout(() => setStateFocused(false), 200);
+                } else if (isCityField) {
+                  setTimeout(() => setCityFocused(false), 200);
+                } else if (isLocalityField) {
+                  setTimeout(() => setLocalityFocused(false), 200);
                 }
               }}
               options={options}
               loading={autocompleteLoading}
               error={error}
               required={config.required}
-              disabled={!isBrandField && !values.brand}
-              showOnFocus={!isBrandField}
+              disabled={
+                (isCityField && !values.state) ||
+                (isLocalityField && (!values.state || !values.city))
+              }
+              showOnFocus={true}
               {...config.props}
             />
           </View>
@@ -295,8 +384,11 @@ const AddMobileDetailsScreen: React.FC = () => {
           />
         }
         contentContainerStyle={{ paddingBottom: spacing.xxxl }}
+        scrollProps={{
+          nestedScrollEnabled: true,
+        }}
       >
-        {fieldConfig.map((config) => renderField(config))}
+        {fieldConfig.map((config, index) => renderField(config, index))}
         <View style={{ height: spacing.xxxl }} />
       </SellFlowLayout>
 

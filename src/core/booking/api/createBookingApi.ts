@@ -73,8 +73,8 @@ export function createBookingApi<TEntity = any>(
         if (!response.data) {
           return [];
         }
-        // Car API returns {data: [...], count, message}
-        const bookingsData = entityType === 'car' ? response.data.data : response.data;
+        // Car API returns array directly, not wrapped in {data: [...]}
+        const bookingsData = response.data;
         if (!bookingsData || !Array.isArray(bookingsData)) {
           return [];
         }
@@ -132,7 +132,7 @@ export function createBookingApi<TEntity = any>(
     async getEntityBookings(entityId: number): Promise<Booking<TEntity>[]> {
       try {
         const response = await api.get<any>(endpoints.getEntityBookings(entityId));
-        const bookingsData = entityType === 'car' ? response.data.data : response.data;
+        const bookingsData = response.data;
         if (!bookingsData || !Array.isArray(bookingsData)) {
           return [];
         }
@@ -169,7 +169,7 @@ export function createBookingApi<TEntity = any>(
 
     async getPendingBookings(sellerId?: number): Promise<Booking<TEntity>[]> {
       const response = await api.get<any>(endpoints.getPendingBookings);
-      const bookingsData = entityType === 'car' ? response.data.data : response.data;
+      const bookingsData = response.data;
       if (!bookingsData || !Array.isArray(bookingsData)) {
         return [];
       }

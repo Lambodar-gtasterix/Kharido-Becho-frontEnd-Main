@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useState, useCallback, useRef } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Modal, TouchableWithoutFeedback, Platform } from 'react-native';
 import TextField from './form/TextField';
 import { colors, spacing } from '@theme/tokens';
 
@@ -35,6 +35,8 @@ export const AutocompleteField: React.FC<AutocompleteFieldProps> = ({
   showOnFocus = false,
 }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [dropdownLayout, setDropdownLayout] = useState({ top: 0, left: 0, width: 0 });
+  const containerRef = useRef<View>(null);
 
   const handleSelect = useCallback((option: string) => {
     onSelect(option);
@@ -46,63 +48,96 @@ export const AutocompleteField: React.FC<AutocompleteFieldProps> = ({
     onBlur();
   }, [onBlur]);
 
-  const shouldShowDropdown = showSuggestions && (loading || options.length > 0) && (showOnFocus || value.length > 0);
+  const handleFocus = useCallback(() => {
+    containerRef.current?.measureInWindow((x, y, width, height) => {
+      setDropdownLayout({ top: y + height, left: x, width });
+    });
+    setShowSuggestions(true);
+    onFocus?.();
+  }, [onFocus]);
+
+  const handleChangeText = useCallback((text: string) => {
+    const upperText = text.toUpperCase();
+    onChangeText(upperText);
+    if (!showSuggestions) {
+      containerRef.current?.measureInWindow((x, y, width, height) => {
+        setDropdownLayout({ top: y + height, left: x, width });
+      });
+    }
+    setShowSuggestions(true);
+  }, [onChangeText, showSuggestions]);
+
+  const shouldShowDropdown = showSuggestions && (showOnFocus || value.length > 0);
+  const hasContent = loading || options.length > 0;
 
   return (
-    <View style={styles.container}>
-      <TextField
-        label={label}
-        value={value}
-        onChangeText={(text) => {
-          const upperText = text.toUpperCase();
-          onChangeText(upperText);
-          if (upperText.length > 0 || showOnFocus) {
-            setShowSuggestions(true);
-          }
-        }}
-        onBlur={handleBlur}
-        onFocus={() => {
-          if (showOnFocus || value.length > 0) {
-            setShowSuggestions(true);
-          }
-          onFocus?.();
-        }}
-        error={error}
-        required={required}
-        placeholder={placeholder}
-        editable={!disabled}
-        autoCapitalize="characters"
-      />
+    <>
+      <View style={styles.container} ref={containerRef}>
+        <TextField
+          label={label}
+          value={value}
+          onChangeText={handleChangeText}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
+          error={error}
+          required={required}
+          placeholder={placeholder}
+          editable={!disabled}
+          autoCapitalize="characters"
+        />
+      </View>
 
-      {shouldShowDropdown && (
-        <View style={styles.dropdown}>
-          {loading && options.length === 0 ? (
-            <View style={styles.loadingInDropdown}>
-              <ActivityIndicator size="small" color={colors.primary} />
-              <Text style={styles.loadingText}>Loading...</Text>
-            </View>
-          ) : (
-            <ScrollView
-              style={styles.list}
-              nestedScrollEnabled={true}
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={true}
-            >
-              {options.map((item, index) => (
-                <TouchableOpacity
-                  key={`${item}-${index}`}
-                  style={[styles.option, index === options.length - 1 && styles.lastOption]}
-                  onPress={() => handleSelect(item)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.optionText}>{item}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          )}
-        </View>
-      )}
-    </View>
+      <Modal
+        visible={shouldShowDropdown && hasContent}
+        transparent={true}
+        animationType="none"
+        onRequestClose={() => setShowSuggestions(false)}
+        supportedOrientations={['portrait', 'landscape']}
+      >
+        <TouchableWithoutFeedback onPress={() => setShowSuggestions(false)}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View
+                style={[
+                  styles.dropdown,
+                  {
+                    top: dropdownLayout.top,
+                    left: dropdownLayout.left,
+                    width: dropdownLayout.width,
+                  },
+                  options.length <= 5 && styles.dropdownSmall,
+                ]}
+              >
+                {loading && options.length === 0 ? (
+                  <View style={styles.loadingInDropdown}>
+                    <ActivityIndicator size="small" color={colors.primary} />
+                    <Text style={styles.loadingText}>Loading...</Text>
+                  </View>
+                ) : (
+                  <FlatList
+                    data={options}
+                    keyExtractor={(item, index) => `${item}-${index}`}
+                    renderItem={({ item, index }) => (
+                      <TouchableOpacity
+                        style={[styles.option, index === options.length - 1 && styles.lastOption]}
+                        onPress={() => handleSelect(item)}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={styles.optionText}>{item}</Text>
+                      </TouchableOpacity>
+                    )}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={true}
+                    bounces={false}
+                    style={styles.flatList}
+                  />
+                )}
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+    </>
   );
 };
 
@@ -110,16 +145,16 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: spacing.md,
   },
+  modalOverlay: {
+    flex: 1,
+  },
   dropdown: {
     position: 'absolute',
-    top: '100%',
-    left: 0,
-    right: 0,
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 8,
-    maxHeight: 200,
+    maxHeight: 250,
     elevation: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -127,11 +162,15 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     marginTop: 4,
   },
-  list: {
+  dropdownSmall: {
     maxHeight: 200,
   },
+  flatList: {
+    flexGrow: 0,
+  },
   option: {
-    padding: spacing.md,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
     backgroundColor: colors.white,

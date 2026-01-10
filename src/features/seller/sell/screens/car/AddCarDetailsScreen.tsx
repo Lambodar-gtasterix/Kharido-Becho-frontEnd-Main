@@ -16,6 +16,7 @@ import {
   DropdownField,
   DropdownOption,
   ReadonlyPickerInput,
+  AutocompleteField,
 } from '@shared/components';
 import { colors, spacing } from '@theme/tokens';
 import { useFormState } from '@shared/form/hooks/useFormState';
@@ -34,6 +35,10 @@ import { addCar } from '@features/seller/sell/api/CarsApi';
 import { normalizeCreateResponse } from '@shared/utils';
 import { getFriendlyApiError } from '@shared/utils';
 import { SellCarStackParamList } from '../../navigation/SellCarStack';
+import { useBrandAutocomplete } from '@core/car/hooks/useBrandAutocomplete';
+import { useVariantAutocomplete } from '@core/car/hooks/useVariantAutocomplete';
+import { useSubVariantAutocomplete } from '@core/car/hooks/useSubVariantAutocomplete';
+import { useStates, useCities, useLocalities } from '@shared/hooks/useLocationData';
 
 type AddCarDetailsScreenNavigationProp = NativeStackNavigationProp<
   SellCarStackParamList,
@@ -60,6 +65,35 @@ const AddCarDetailsScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [yearPickerVisible, setYearPickerVisible] = useState(false);
   const [insuranceDatePickerVisible, setInsuranceDatePickerVisible] = useState(false);
+  const [colorPickerVisible, setColorPickerVisible] = useState(false);
+  const [brandFocused, setBrandFocused] = useState(false);
+  const [variantFocused, setVariantFocused] = useState(false);
+  const [subVariantFocused, setSubVariantFocused] = useState(false);
+  const [stateFocused, setStateFocused] = useState(false);
+  const [cityFocused, setCityFocused] = useState(false);
+  const [localityFocused, setLocalityFocused] = useState(false);
+
+  const { brands, loading: brandsLoading } = useBrandAutocomplete(values.brand || '', brandFocused);
+  const { variants, loading: variantsLoading } = useVariantAutocomplete(
+    values.brand || '',
+    values.model || '',
+    variantFocused
+  );
+  const { subVariants, loading: subVariantsLoading } = useSubVariantAutocomplete(
+    values.brand || '',
+    values.model || '',
+    values.variant || '',
+    subVariantFocused
+  );
+
+  // Location hooks
+  const { states, loading: statesLoading } = useStates();
+  const { cities, loading: citiesLoading } = useCities(values.state || '', stateFocused || !!values.state);
+  const { localities, loading: localitiesLoading } = useLocalities(
+    values.state || '',
+    values.city || '',
+    cityFocused || !!(values.state && values.city)
+  );
 
   useEffect(() => {
     if (values.carInsurance === false) {
@@ -85,11 +119,36 @@ const AddCarDetailsScreen: React.FC = () => {
     return years;
   }, []);
 
+  const colorOptions = useMemo<BottomSheetPickerOption<string>[]>(() => [
+    { label: 'Pearl White', value: 'Pearl White' },
+    { label: 'Jet Black', value: 'Jet Black' },
+    { label: 'Midnight Black', value: 'Midnight Black' },
+    { label: 'Arctic White', value: 'Arctic White' },
+    { label: 'Silver Metallic', value: 'Silver Metallic' },
+    { label: 'Grey Metallic', value: 'Grey Metallic' },
+    { label: 'Space Gray', value: 'Space Gray' },
+    { label: 'Deep Blue', value: 'Deep Blue' },
+    { label: 'Navy Blue', value: 'Navy Blue' },
+    { label: 'Sky Blue', value: 'Sky Blue' },
+    { label: 'Wine Red', value: 'Wine Red' },
+    { label: 'Maroon', value: 'Maroon' },
+    { label: 'Ruby Red', value: 'Ruby Red' },
+    { label: 'Titanium Grey', value: 'Titanium Grey' },
+    { label: 'Champagne Gold', value: 'Champagne Gold' },
+    { label: 'Bronze', value: 'Bronze' },
+    { label: 'Brown', value: 'Brown' },
+    { label: 'Beige', value: 'Beige' },
+    { label: 'Orange', value: 'Orange' },
+    { label: 'Green', value: 'Green' },
+    { label: 'Other', value: 'OTHER' },
+  ], []);
+
   const fieldConfig = useMemo(
     () =>
       getCarDetailsFieldConfig({
         onOpenYearPicker: () => setYearPickerVisible(true),
         onOpenInsuranceDatePicker: () => setInsuranceDatePickerVisible(true),
+        onOpenColorPicker: () => setColorPickerVisible(true),
       }),
     [],
   );
@@ -104,7 +163,7 @@ const AddCarDetailsScreen: React.FC = () => {
       case 'text': {
         const formattedValue = value == null ? '' : String(value);
         const extraProps =
-          field === 'carInsuranceDate' || field === 'carInsuranceType'
+          field === 'carInsuranceDate'
             ? { editable: values.carInsurance === true }
             : null;
 
@@ -153,6 +212,9 @@ const AddCarDetailsScreen: React.FC = () => {
         const props = config.props ?? {};
         const data: DropdownOption<any>[] = props.data ?? [];
         const { placeholder, ...restProps } = props;
+        const isInsuranceTypeField = field === 'carInsuranceType';
+        const isDisabled = isInsuranceTypeField ? values.carInsurance !== true : false;
+
         return (
           <DropdownField
             key={String(field)}
@@ -166,6 +228,7 @@ const AddCarDetailsScreen: React.FC = () => {
             required={config.required}
             error={error}
             placeholder={placeholder}
+            disabled={isDisabled}
             {...restProps}
           />
         );
@@ -183,6 +246,137 @@ const AddCarDetailsScreen: React.FC = () => {
             onPress={onPress ?? (() => {})}
             {...restProps}
           />
+        );
+      }
+      case 'autocomplete': {
+        const formattedValue = value == null ? '' : String(value);
+        const isBrandField = field === 'brand';
+        const isVariantField = field === 'model';
+        const isSubVariantField = field === 'variant';
+        const isStateField = field === 'state';
+        const isCityField = field === 'city';
+        const isLocalityField = field === 'address';
+
+        let options: string[] = [];
+        let autocompleteLoading = false;
+
+        if (isBrandField) {
+          options = brands;
+          autocompleteLoading = brandsLoading;
+        } else if (isVariantField) {
+          options = variants;
+          autocompleteLoading = variantsLoading;
+        } else if (isSubVariantField) {
+          options = subVariants;
+          autocompleteLoading = subVariantsLoading;
+        } else if (isStateField) {
+          options = states;
+          autocompleteLoading = statesLoading;
+        } else if (isCityField) {
+          options = cities;
+          autocompleteLoading = citiesLoading;
+        } else if (isLocalityField) {
+          options = localities;
+          autocompleteLoading = localitiesLoading;
+        }
+
+        const zIndex = isBrandField ? 1000 : isVariantField ? 999 : isSubVariantField ? 998 : isStateField ? 997 : isCityField ? 996 : 995;
+
+        return (
+          <View key={String(field)} style={{ zIndex }}>
+            <AutocompleteField
+              label={config.label}
+              value={formattedValue}
+              onChangeText={(text) => {
+                setFieldValue(field, text, { validate: Boolean(touched[field]) });
+                if (isBrandField && text !== values.brand) {
+                  setFieldValue('model', '', { validate: false });
+                  setFieldValue('variant', '', { validate: false });
+                  setVariantFocused(false);
+                  setSubVariantFocused(false);
+                } else if (isVariantField && text !== values.model) {
+                  setFieldValue('variant', '', { validate: false });
+                  setSubVariantFocused(false);
+                } else if (isStateField && text !== values.state) {
+                  setFieldValue('city', '', { validate: false });
+                  setFieldValue('address', '', { validate: false });
+                  setCityFocused(false);
+                  setLocalityFocused(false);
+                } else if (isCityField && text !== values.city) {
+                  setFieldValue('address', '', { validate: false });
+                  setLocalityFocused(false);
+                }
+              }}
+              onSelect={(option) => {
+                touchField(field);
+                setFieldValue(field, option, { validate: true });
+                if (isBrandField) {
+                  setFieldValue('model', '', { validate: false });
+                  setFieldValue('variant', '', { validate: false });
+                  setVariantFocused(false);
+                  setSubVariantFocused(false);
+                  setBrandFocused(false);
+                } else if (isVariantField) {
+                  setFieldValue('variant', '', { validate: false });
+                  setSubVariantFocused(false);
+                  setVariantFocused(false);
+                } else if (isStateField) {
+                  setFieldValue('city', '', { validate: false });
+                  setFieldValue('address', '', { validate: false });
+                  setCityFocused(false);
+                  setLocalityFocused(false);
+                  setStateFocused(false);
+                } else if (isCityField) {
+                  setFieldValue('address', '', { validate: false });
+                  setLocalityFocused(false);
+                  setCityFocused(false);
+                }
+              }}
+              onFocus={() => {
+                if (isBrandField) {
+                  setBrandFocused(true);
+                } else if (isVariantField) {
+                  setVariantFocused(true);
+                } else if (isSubVariantField) {
+                  setSubVariantFocused(true);
+                } else if (isStateField) {
+                  setStateFocused(true);
+                } else if (isCityField) {
+                  setCityFocused(true);
+                } else if (isLocalityField) {
+                  setLocalityFocused(true);
+                }
+              }}
+              onBlur={() => {
+                handleBlur(field);
+                if (isBrandField) {
+                  setTimeout(() => setBrandFocused(false), 200);
+                } else if (isVariantField) {
+                  setTimeout(() => setVariantFocused(false), 200);
+                } else if (isSubVariantField) {
+                  setTimeout(() => setSubVariantFocused(false), 200);
+                } else if (isStateField) {
+                  setTimeout(() => setStateFocused(false), 200);
+                } else if (isCityField) {
+                  setTimeout(() => setCityFocused(false), 200);
+                } else if (isLocalityField) {
+                  setTimeout(() => setLocalityFocused(false), 200);
+                }
+              }}
+              options={options}
+              loading={autocompleteLoading}
+              error={error}
+              required={config.required}
+              disabled={
+                (isVariantField && !values.brand) ||
+                (isSubVariantField && (!values.brand || !values.model)) ||
+                (isCityField && !values.state) ||
+                (isLocalityField && (!values.state || !values.city))
+              }
+              showOnFocus={true}
+              {...config.props}
+            />
+          </View>
         );
       }
       default:
@@ -252,6 +446,46 @@ const AddCarDetailsScreen: React.FC = () => {
           setYearPickerVisible(false);
         }}
         onClose={() => setYearPickerVisible(false)}
+      />
+
+      <BottomSheetPicker
+        visible={colorPickerVisible}
+        title="Select Color"
+        options={colorOptions}
+        selectedValue={values.color === 'OTHER' ? 'OTHER' : values.color}
+        onSelect={(color) => {
+          if (color === 'OTHER') {
+            setColorPickerVisible(false);
+            setTimeout(() => {
+              Alert.prompt(
+                'Enter Custom Color',
+                'Please enter your car color',
+                [
+                  {
+                    text: 'Cancel',
+                    style: 'cancel',
+                  },
+                  {
+                    text: 'OK',
+                    onPress: (customColor) => {
+                      if (customColor && customColor.trim()) {
+                        touchField('color');
+                        setFieldValue('color', customColor.trim(), { validate: true });
+                      }
+                    },
+                  },
+                ],
+                'plain-text',
+                values.color && values.color !== 'OTHER' ? values.color : '',
+              );
+            }, 300);
+          } else {
+            touchField('color');
+            setFieldValue('color', color, { validate: true });
+            setColorPickerVisible(false);
+          }
+        }}
+        onClose={() => setColorPickerVisible(false)}
       />
 
       {insuranceDatePickerVisible && (

@@ -76,6 +76,7 @@ export const mobileDetailsSchema = z.object({
       'Brand name cannot be numbers only'
     ),
   model: z.string().min(1, 'Model name is required').max(40, 'Model name must not exceed 40 characters'),
+  modelId: z.number({ required_error: 'Please select a model' }),
   color: z
     .string()
     .trim()
@@ -84,6 +85,9 @@ export const mobileDetailsSchema = z.object({
       (v) => HEX_REGEX.test(v) || NAME_REGEX.test(v),
       'Enter a valid color name (2–30 letters) or hex code with # (e.g., #fff, #1a2b3c)'
     ),
+  state: z.string().min(1, 'State is required'),
+  city: z.string().min(1, 'City is required'),
+  address: z.string().min(1, 'Address/Locality is required'),
   yearOfPurchase: z
     .string()
     .min(4, 'Please select year of purchase')
@@ -108,9 +112,12 @@ export const getDefaultMobileDetailsValues = (): MobileDetailsFormValues => ({
   condition: undefined as any,
   brand: '',
   model: '',
+  modelId: undefined as any,
   color: 'Phantom Black',
+  state: '',
+  city: '',
+  address: '',
   yearOfPurchase: '2022',
-
 });
 
 //

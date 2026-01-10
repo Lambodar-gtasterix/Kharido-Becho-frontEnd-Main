@@ -5,3 +5,5 @@ export * from './getAll';
 export * from './getById';
 export * from './update';
 export * from './uploadImages';
+export * from './getBrands';
+export * from './getModels';

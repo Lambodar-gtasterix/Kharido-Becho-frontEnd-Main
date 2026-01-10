@@ -15,9 +15,11 @@ export interface MobileCreateDTO {
   price: number;
   negotiable: boolean;
   condition: 'NEW' | 'USED' | 'REFURBISHED';
-  brand: string;
-  model: string;
+  modelId: number;
   color?: string | null;
+  state: string;
+  city: string;
+  address: string;
   yearOfPurchase: number;
   sellerId: number;
 }
@@ -128,6 +130,10 @@ export const toMobileCreateDTO = (
   const price = Number(priceValue.toFixed(2));
   const yearOfPurchase = Number(values.yearOfPurchase);
 
+  if (!values.modelId) {
+    throw new Error('Model is required');
+  }
+
   const colorValue = values.color?.trim();
   const hasColor = colorValue && colorValue.length > 0;
 
@@ -137,9 +143,11 @@ export const toMobileCreateDTO = (
     price,
     negotiable: values.negotiable === true,
     condition: values.condition.toUpperCase() as 'NEW' | 'USED' | 'REFURBISHED',
-    brand: values.brand.trim(),
-    model: values.model.trim(),
+    modelId: values.modelId,
     yearOfPurchase,
+    state: values.state.trim(),
+    city: values.city.trim(),
+    address: values.address.trim(),
     sellerId,
   };
 

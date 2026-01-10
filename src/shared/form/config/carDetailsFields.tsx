@@ -13,10 +13,12 @@ import {
 import { DropdownOption } from '@shared/components';
 import { Condition } from '../../types/listings';
 import { colors } from '@theme/tokens';
+import { INDIAN_STATES } from '@shared/constants/indianStates';
 
 interface CarFieldConfigOptions {
   onOpenYearPicker: () => void;
   onOpenInsuranceDatePicker: () => void;
+  onOpenColorPicker: () => void;
 }
 
 const booleanOptions: DropdownOption<boolean>[] = [
@@ -48,11 +50,18 @@ const transmissionOptions: DropdownOption<CarTransmissionType>[] = [
   { label: 'DCT', value: 'DCT' },
 ];
 
+const insuranceTypeOptions: DropdownOption<string>[] = [
+  { label: 'Third Party Insurance', value: 'Third Party Insurance' },
+  { label: 'Third Party, Fire & Theft Insurance', value: 'Third Party, Fire & Theft Insurance' },
+  { label: 'Comprehensive Insurance', value: 'Comprehensive Insurance' },
+];
+
 const numericOnly = (value: string) => value.replace(/[^0-9]/g, '');
 
 export const getCarDetailsFieldConfig = ({
   onOpenYearPicker,
   onOpenInsuranceDatePicker,
+  onOpenColorPicker,
 }: CarFieldConfigOptions): Array<FormFieldConfig<CarDetailsFormValues>> => [
   {
     field: 'title',
@@ -92,48 +101,38 @@ export const getCarDetailsFieldConfig = ({
   {
     field: 'brand',
     label: 'Brand',
-    component: 'text',
+    component: 'autocomplete',
     required: true,
     props: {
       placeholder: 'e.g., Toyota, BMW',
-      autoCapitalize: 'words' as const,
-      autoCorrect: false,
-      maxLength: 60,
     },
   },
   {
     field: 'model',
-    label: 'Model',
-    component: 'text',
+    label: 'Variant',
+    component: 'autocomplete',
     required: true,
     props: {
-      placeholder: 'e.g., Camry',
-      autoCapitalize: 'words' as const,
-      autoCorrect: false,
-      maxLength: 60,
+      placeholder: 'e.g., Swift, Camry',
     },
   },
   {
     field: 'variant',
-    label: 'Variant',
-    component: 'text',
+    label: 'Sub-Variant',
+    component: 'autocomplete',
     required: true,
     props: {
-      placeholder: 'e.g., Hybrid XLE',
-      autoCapitalize: 'words' as const,
-      autoCorrect: false,
-      maxLength: 60,
+      placeholder: 'e.g., VXI, Hybrid XLE',
     },
   },
   {
     field: 'color',
     label: 'Color',
-    component: 'text',
+    component: 'readonlyPicker',
     required: true,
     props: {
-      placeholder: 'e.g., Pearl White',
-      autoCapitalize: 'words' as const,
-      maxLength: 40,
+      placeholder: 'Select color',
+      onPress: onOpenColorPicker,
     },
   },
   {
@@ -191,39 +190,30 @@ export const getCarDetailsFieldConfig = ({
     transform: numericOnly,
   },
   {
-    field: 'address',
-    label: 'Address',
-    component: 'textarea',
+    field: 'state',
+    label: 'State',
+    component: 'autocomplete',
     required: true,
     props: {
-      placeholder: 'House number, street, locality',
-      autoCapitalize: 'sentences' as const,
-      maxLength: 200,
+      placeholder: 'Select state',
     },
-    getLabelAccessory: ({ values }) => (
-      <Text style={styles.charCount}>{values.address.length}/200</Text>
-    ),
   },
   {
     field: 'city',
     label: 'City',
-    component: 'text',
+    component: 'autocomplete',
     required: true,
     props: {
-      placeholder: 'e.g., Gurugram',
-      autoCapitalize: 'words' as const,
-      maxLength: 60,
+      placeholder: 'Select city',
     },
   },
   {
-    field: 'state',
-    label: 'State',
-    component: 'text',
+    field: 'address',
+    label: 'Locality',
+    component: 'autocomplete',
     required: true,
     props: {
-      placeholder: 'e.g., Haryana',
-      autoCapitalize: 'words' as const,
-      maxLength: 60,
+      placeholder: 'Select locality',
     },
   },
   {
@@ -261,12 +251,11 @@ export const getCarDetailsFieldConfig = ({
   {
     field: 'carInsuranceType',
     label: 'Insurance Type',
-    component: 'text',
+    component: 'dropdown',
     required: false,
     props: {
-      placeholder: 'e.g., Comprehensive',
-      autoCapitalize: 'words' as const,
-      maxLength: 40,
+      data: insuranceTypeOptions,
+      placeholder: 'Select insurance type',
     },
   },
   {

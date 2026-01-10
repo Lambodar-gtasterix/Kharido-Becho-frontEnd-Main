@@ -19,11 +19,29 @@ export interface CarEntity extends BaseEntity {
   carId: number;
   brand?: string;
   model?: string;
+  variant?: string;
   color?: string;
-  yearOfManufacture?: number;
+  yearOfPurchase?: number;
   fuelType?: string;
   transmission?: string;
-  mileage?: number;
+  kmDriven?: number;
+  numberOfOwners?: number;
+  address?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+  carInsurance?: boolean;
+  carInsuranceDate?: string;
+  carInsuranceType?: string;
+  airbag?: boolean;
+  abs?: boolean;
+  buttonStart?: boolean;
+  sunroof?: boolean;
+  childSafetyLocks?: boolean;
+  acFeature?: boolean;
+  musicFeature?: boolean;
+  powerWindowFeature?: boolean;
+  rearParkingCameraFeature?: boolean;
 }
 
 // Laptop Entity Type
@@ -131,23 +149,101 @@ export const carConfig: EntityConfig<CarEntity> = {
 
   detailFields: [
     { key: 'brand', label: 'Brand', icon: 'car' },
-    { key: 'model', label: 'Model', icon: 'information' },
+    { key: 'model', label: 'Variant', icon: 'information' },
+    { key: 'variant', label: 'Sub-Variant', icon: 'tag' },
     { key: 'condition', label: 'Condition', icon: 'star' },
     {
-      key: 'yearOfManufacture',
-      label: 'Year',
+      key: 'yearOfPurchase',
+      label: 'Year of Purchase',
       icon: 'calendar',
       format: (value) => value?.toString() || 'N/A',
     },
     { key: 'fuelType', label: 'Fuel Type', icon: 'gas-station' },
     { key: 'transmission', label: 'Transmission', icon: 'car-shift-pattern' },
     {
-      key: 'mileage',
-      label: 'Mileage',
+      key: 'kmDriven',
+      label: 'Kilometers Driven',
       icon: 'speedometer',
-      format: (value) => (value ? `${value} km` : 'N/A'),
+      format: (value) => (value ? `${value.toLocaleString('en-IN')} km` : 'N/A'),
+    },
+    {
+      key: 'numberOfOwners',
+      label: 'Number of Owners',
+      icon: 'account-multiple',
+      format: (value) => value?.toString() || 'N/A',
     },
     { key: 'color', label: 'Color', icon: 'palette' },
+    {
+      key: 'carInsurance',
+      label: 'Car Insurance',
+      icon: 'shield-check',
+      format: (value) => value ? 'Yes' : 'No',
+    },
+    {
+      key: 'carInsuranceDate',
+      label: 'Insurance Valid Till',
+      icon: 'calendar-clock',
+      format: (value) => value || 'N/A',
+    },
+    { key: 'carInsuranceType', label: 'Insurance Type', icon: 'shield-account' },
+    {
+      key: 'airbag',
+      label: 'Airbags',
+      icon: 'airbag',
+      format: (value) => value ? 'Yes' : 'No',
+    },
+    {
+      key: 'abs',
+      label: 'ABS',
+      icon: 'car-brake-alert',
+      format: (value) => value ? 'Yes' : 'No',
+    },
+    {
+      key: 'buttonStart',
+      label: 'Push Button Start',
+      icon: 'power',
+      format: (value) => value ? 'Yes' : 'No',
+    },
+    {
+      key: 'sunroof',
+      label: 'Sunroof',
+      icon: 'car-door',
+      format: (value) => value ? 'Yes' : 'No',
+    },
+    {
+      key: 'acFeature',
+      label: 'AC Feature',
+      icon: 'air-conditioner',
+      format: (value) => value ? 'Yes' : 'No',
+    },
+    {
+      key: 'musicFeature',
+      label: 'Music System',
+      icon: 'music',
+      format: (value) => value ? 'Yes' : 'No',
+    },
+    {
+      key: 'powerWindowFeature',
+      label: 'Power Windows',
+      icon: 'window-open',
+      format: (value) => value ? 'Yes' : 'No',
+    },
+    {
+      key: 'rearParkingCameraFeature',
+      label: 'Rear Parking Camera',
+      icon: 'camera',
+      format: (value) => value ? 'Yes' : 'No',
+    },
+    {
+      key: 'childSafetyLocks',
+      label: 'Child Safety Locks',
+      icon: 'shield-lock',
+      format: (value) => value ? 'Yes' : 'No',
+    },
+    { key: 'address', label: 'Address', icon: 'map-marker' },
+    { key: 'city', label: 'City', icon: 'city' },
+    { key: 'state', label: 'State', icon: 'map' },
+    { key: 'pincode', label: 'Pincode', icon: 'mailbox' },
   ],
 
   stackName: 'CarStack',
